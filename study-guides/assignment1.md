@@ -1,11 +1,18 @@
 # Assignment 1 - Study Guide
 ___
 
+
 ## Q1: k-Nearest Neighbor classifier (20 points)
 
-> The IPython Notebook knn.ipynb will walk you through implementing the kNN classifier.
-
 ### Tips
+
+__Level up your numpy__
+
+> You'll realize after going through the first question that a strong understanding of numpy will be essential.  Jake VanderPlas is one of my favorite data scientist to follow when it comes to numpy.  Check out his fantastic talk on [how you can speed up your python code with numpy](https://www.youtube.com/watch?v=EEUXKG97YRw).
+
+__For the hardcore__
+> To get a better understanding of measuring distances and leveraging numpy to the fullest,  I suggest you check out Christian Bauckhage's work.  Especially his papers on [Computing Nearest Neighbors](https://multimedia-pattern-recognition.info/fileadmin/Websites/mmprec/uploads/docs/Bauckhage/np-sp-rec-edm.pdf)
+ and [Squared Euclidean Distance Matrices](https://www.researchgate.net/publication/266617010_NumPy_SciPy_Recipes_for_Data_Science_Squared_Euclidean_Distance_Matrices?channel=doi&linkId=543598a70cf2643ab9867c26&showFulltext=true).
 
 
 ## Q2: Training a Support Vector Machine (25 points)
