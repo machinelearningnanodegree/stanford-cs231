@@ -8,7 +8,13 @@ Course URL: http://cs231n.stanford.edu/
 
 Assignments and Notes: http://cs231n.github.io/
 
-Lectures: https://www.youtube.com/playlist?list=PLLvH2FwAQhnpj1WEB-jHmPuUeQ8mX-XXG
+Lecture Slides: http://cs231n.stanford.edu/syllabus.html
+
+Lectures Videos: https://www.youtube.com/playlist?list=PLLvH2FwAQhnpj1WEB-jHmPuUeQ8mX-XXG
+
+Reddit Channel: https://www.reddit.com/r/cs231n/
+
+Twitter: https://twitter.com/cs231n
 
 ## Helpful Resources
 
@@ -16,4 +22,4 @@ Lectures: https://www.youtube.com/playlist?list=PLLvH2FwAQhnpj1WEB-jHmPuUeQ8mX-X
 
 2) Andrew Trask's [blog](http://iamtrask.github.io/)
 
-3) Reddit Channel: https://www.reddit.com/r/cs231n/
+3) Colah's [blog](http://colah.github.io/) on Neural Networks 
