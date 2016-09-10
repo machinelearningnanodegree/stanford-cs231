@@ -28,7 +28,9 @@ Resources for students in the Udacity's Machine Learning Engineer Nanodegree to 
 A place for students to share code, double check their work and troubleshoot problems.  
 
 __Honor Code__
+
 > We ask that you not look at this section __unless you have finished the assignment or have spent quality time figuring out the problem.__  Out of respect for Stanford releasing their class to the public, please do not abuse this policy.  Try your best to figure out the solutions on your own, read the Reddit forms, or ask questions on our Slack channel before looking at solution code.  Personally, I like to spend 2 - 4 days trying to figure something out before looking at solution code. 
 
 __Contributions__
+
 If you have finished the assignment, we hope you can add your answers to the repository for other students.  If you choose to do so, please fork the repo and add a folder with your alias and put the assignments inside your folder. 
