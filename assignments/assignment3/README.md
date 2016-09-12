@@ -7,13 +7,9 @@ lectures. Specifically, you will:
 - Use **transfer learning** to adapt a pretrained model to a new dataset
 - Use data gradients to visualize **saliency maps** and create **fooling images**
 
-## Setup
-You can work on the assignment in one of two ways: locally on your own machine, or on a virtual machine through [Terminal](https://www.terminal.com/).
-
 ### Working locally
 **Get the code:**
 Download the starter code [here](http://cs231n.stanford.edu/assignment3.zip).
-
 
 **[Optional] virtual environment:**
 Once you have unzipped the starter code, you might want to create a
@@ -64,17 +60,6 @@ After you have downloaded the data and compiled the Cython extensions,
 you should start the IPython notebook server from the
 `assignmen3` directory. If you are unfamiliar with IPython, you should read our
 [IPython tutorial](/ipython-tutorial).
-
-### Working on Terminal
-We have created a Terminal snapshot that is preconfigured for this assignment;
-you can [find it here](https://www.terminal.com/snapshot/f8e4a56cfde0d0baa519c501dfe24b3394a3124b8b84356d2cd033a229a59bff). Terminal allows you to work on the assignment from your browser. You can find a tutorial on how to use it [here](/terminal-tutorial).
-
-### Submitting your work:
-Whether you work on the assignment locally or using Terminal, once you are done
-working run the `collectSubmission.sh` script; this will produce a file called
-`assignment3.zip`. Upload this file to your dropbox on
-[the coursework](https://coursework.stanford.edu/portal/site/W15-CS-231N-01/)
-page for the course.
 
 ### Q1: Dropout and Data Augmentation
 

@@ -12,10 +12,6 @@ In this assignment you will practice putting together a simple image classificat
 - understand the differences and tradeoffs between these classifiers
 - get a basic understanding of performance improvements from using **higher-level representations** than raw pixels (e.g. color histograms, Histogram of Gradient (HOG) features)
 
-## Setup
-You can work on the assignment in one of two ways: locally on your own machine, or on a virtual machine
-through [Terminal](https://www.terminal.com/).
-
 ### Working locally
 **Get the code:**
 [Download the starter code here](http://vision.stanford.edu/teaching/cs231n/assignment1.zip).
@@ -51,34 +47,23 @@ After you have the CIFAR-10 data, you should start the IPython notebook server f
 `assignment1` directory. If you are unfamiliar with IPython, you should read our
 [IPython tutorial](/ipython-tutorial).
 
-### Working on Terminal
-We have created a Terminal snapshot that is preconfigured for this assignment;
-you can [find it here](https://www.terminal.com/tiny/hUxP8UTMKa). Terminal allows you to work on the assignment from your browser. You can find a tutorial on how to use it [here](/terminal-tutorial).
-
-### Submitting your work:
-Whether you work on the assignment locally or using Terminal, once you are done
-working run the `collectSubmission.sh` script; this will produce a file called
-`assignment1.zip`. Upload this file to your dropbox on
-[the coursework](https://coursework.stanford.edu/portal/site/W15-CS-231N-01/)
-page for the course.
-
-### Q1: k-Nearest Neighbor classifier (30 points)
+### Q1: k-Nearest Neighbor classifier
 
 The IPython Notebook **knn.ipynb** will walk you through implementing the kNN classifier.
 
-### Q2: Training a Support Vector Machine (30 points)
+### Q2: Training a Support Vector Machine
 
 The IPython Notebook **svm.ipynb** will walk you through implementing the SVM classifier.
 
-### Q3: Implement a Softmax classifier (30 points)
+### Q3: Implement a Softmax classifier
 
 The IPython Notebook **softmax.ipynb** will walk you through implementing the Softmax classifier.
 
-### Q4: Higher Level Representations: Image Features (10 points)
+### Q4: Higher Level Representations: Image Features
 
 The IPython Notebook **features.ipynb** will walk you through this exercise, in which you will examine the improvements gained by using higher-level representations as opposed to using raw pixel values.
 
-### Q5: Bonus: Design your own features! (+10 points)
+### Q5: Bonus: Design your own features!
 
 In this assignment we provide you with Color Histograms and HOG features. To claim these bonus points, implement your own additional features from scratch, and using only numpy or scipy (no external dependencies). You will have to research different feature types to get ideas for what you might want to implement. Your new feature should help you improve the performance beyond what you got in Q4 if you wish to get these bonus points. If you come up with nice features we'll feature them in the lecture.
 
