@@ -13,21 +13,6 @@ are as follows:
 - understand the architecture of **Convolutional Neural Networks** and train
   gain experience with training these models on data
 
-## Setup
-You can work on the assignment in one of two ways: locally on your own machine,
-or on a virtual machine through Terminal.com. 
-
-### Working in the cloud on Terminal
-
-Terminal has created a separate subdomain to serve our class,
-[www.stanfordterminalcloud.com](https://www.stanfordterminalcloud.com). Register
-your account there. The Assignment 2 snapshot can then be found HERE. If you are
-registered in the class you can contact the TA (see Piazza for more information)
-to request Terminal credits for use on the assignment. Once you boot up the
-snapshot everything will be installed for you, and you will be ready to start on
-your assignment right away. We have written a small tutorial on Terminal
-[here](http://cs231n.github.io/terminal-tutorial/).
-
 ### Working locally
 Get the code as a zip file
 [here](http://vision.stanford.edu/teaching/cs231n/winter1516_assignment2.zip).
@@ -90,35 +75,27 @@ You can work around this issue by starting the IPython server using the
 assumes that your virtual environment is named `.env`.
 
 
-### Submitting your work:
-Whether you work on the assignment locally or using Terminal, once you are done
-working run the `collectSubmission.sh` script; this will produce a file called
-`assignment2.zip`. Upload this file to your dropbox on
-[the coursework](https://coursework.stanford.edu/portal/site/W15-CS-231N-01/)
-page for the course.
-
-
-### Q1: Fully-connected Neural Network (30 points)
+### Q1: Fully-connected Neural Network
 The IPython notebook `FullyConnectedNets.ipynb` will introduce you to our
 modular layer design, and then use those layers to implement fully-connected
 networks of arbitrary depth. To optimize these models you will implement several
 popular update rules.
 
-### Q2: Batch Normalization (30 points)
+### Q2: Batch Normalization
 In the IPython notebook `BatchNormalization.ipynb` you will implement batch
 normalization, and use it to train deep fully-connected networks.
 
-### Q3: Dropout (10 points)
+### Q3: Dropout
 The IPython notebook `Dropout.ipynb` will help you implement Dropout and explore
 its effects on model generalization.
 
-### Q4: ConvNet on CIFAR-10 (30 points)
+### Q4: ConvNet on CIFAR-10
 In the IPython Notebook `ConvolutionalNetworks.ipynb` you will implement several
 new layers that are commonly used in convolutional networks. You will train a
 (shallow) convolutional network on CIFAR-10, and it will then be up to you to
 train the best network that you can.
 
-### Q5: Do something extra! (up to +10 points)
+### Q5: Do something extra!
 In the process of training your network, you should feel free to implement
 anything that you want to get better performance. You can modify the solver,
 implement additional layers, use different types of regularization, use an
