@@ -94,14 +94,75 @@ class KNNModel(object):
         num_correct = np.sum(y_test_pred == self.y_test)
         accuracy = float(num_correct) / self.num_test
         print 'Got %d / %d correct => accuracy: %f' % (num_correct, self.num_test, accuracy)
-
+        self.dists = dists
         return
+    def compute_distance_oneloop(self):
+        # Now lets speed up distance matrix computation by using partial vectorization
+        # with one loop. Implement the function compute_distances_one_loop and run the
+        # code below:
+        dists_one = self.classifier.compute_distances_one_loop(self.X_test)
+        
+        # To ensure that our vectorized implementation is correct, we make sure that it
+        # agrees with the naive implementation. There are many ways to decide whether
+        # two matrices are similar; one of the simplest is the Frobenius norm. In case
+        # you haven't seen it before, the Frobenius norm of two matrices is the square
+        # root of the squared sum of differences of all elements; in other words, reshape
+        # the matrices into vectors and compute the Euclidean distance between them.
+        difference = np.linalg.norm(self.dists - dists_one, ord='fro')
+        print 'Difference was: %f' % (difference, )
+        if difference < 0.001:
+            print 'Good! The distance matrices are the same'
+        else:
+            print 'Uh-oh! The distance matrices are different'
+        return
+    def compute_distance_noloop(self):
+        # Now lets speed up distance matrix computation by using partial vectorization
+        # with one loop. Implement the function compute_distances_one_loop and run the
+        # code below:
+        dists_two = self.classifier.compute_distances_no_loops(self.X_test)
+        
+        # To ensure that our vectorized implementation is correct, we make sure that it
+        # agrees with the naive implementation. There are many ways to decide whether
+        # two matrices are similar; one of the simplest is the Frobenius norm. In case
+        # you haven't seen it before, the Frobenius norm of two matrices is the square
+        # root of the squared sum of differences of all elements; in other words, reshape
+        # the matrices into vectors and compute the Euclidean distance between them.
+        difference = np.linalg.norm(self.dists - dists_two, ord='fro')
+        print 'Difference was: %f' % (difference, )
+        if difference < 0.001:
+            print 'Good! The distance matrices are the same'
+        else:
+            print 'Uh-oh! The distance matrices are different'
+        return
+    def time_function(self, f, *args):
+        """
+        Call a function f with args and return the time (in seconds) that it took to execute.
+        """
+        import time
+        tic = time.time()
+        f(*args)
+        toc = time.time()
+        return toc - tic
+    def compare_vectorization_speed(self):
+        two_loop_time = self.time_function(self.classifier.compute_distances_two_loops, self.X_test)
+        print 'Two loop version took %f seconds' % two_loop_time
+        
+        one_loop_time = self.time_function(self.classifier.compute_distances_one_loop, self.X_test)
+        print 'One loop version took %f seconds' % one_loop_time
+        
+        no_loop_time = self.time_function(self.classifier.compute_distances_no_loops, self.X_test)
+        print 'No loop version took %f seconds' % no_loop_time
+        return
+        # you should see significantly faster performance with the fully vectorized implementation
     def run(self):
         self.load_data()
 #         self.visualize_data()
         self.subsample_reshape()
         self.train()
-        self.predict()
+#         self.predict()
+#         self.compute_distance_noloop()
+        self.compare_vectorization_speed()
+#         self.compute_distance_oneloop()
         
         return
 
