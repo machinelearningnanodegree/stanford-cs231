@@ -1,5 +1,6 @@
 import sys
 import os
+from astropy.units import ys
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -9,6 +10,7 @@ from assignment1.cs231n.data_utils import load_CIFAR10
 import matplotlib.pyplot as plt
 from assignment1.cs231n import data_utils
 from assignment1.cs231n.classifiers.k_nearest_neighbor import KNearestNeighbor
+from sklearn.cross_validation import KFold
 
 
 class KNNModel(object):
@@ -144,6 +146,7 @@ class KNNModel(object):
         toc = time.time()
         return toc - tic
     def compare_vectorization_speed(self):
+        # you should see significantly faster performance with the fully vectorized implementation
         two_loop_time = self.time_function(self.classifier.compute_distances_two_loops, self.X_test)
         print 'Two loop version took %f seconds' % two_loop_time
         
@@ -153,15 +156,86 @@ class KNNModel(object):
         no_loop_time = self.time_function(self.classifier.compute_distances_no_loops, self.X_test)
         print 'No loop version took %f seconds' % no_loop_time
         return
-        # you should see significantly faster performance with the fully vectorized implementation
+    def do_cross_validation(self):
+        num_folds = 5
+        k_choices = [1, 3, 5, 8, 10, 12, 15, 20, 50, 100]
+        
+        X_train_folds = []
+        y_train_folds = []
+        X_val_folds = []
+        y_val_folds = []
+        kf = KFold(self.y_train.shape[0], n_folds=num_folds)
+        for train_index, val_index in kf:
+            X_train, X_val = self.X_train[train_index], self.X_train[val_index]
+            y_train, y_val = self.y_train[train_index], self.y_train[val_index]
+            X_train_folds.append(X_train)
+            y_train_folds.append(y_train)
+            X_val_folds.append(X_val)
+            y_val_folds.append(y_val)
+        k_to_accuracies = {}
+        self.classifier = KNearestNeighbor()
+        for k in k_choices:
+            for n_fold in range(num_folds):
+                self.classifier.train(X_train_folds[n_fold], y_train_folds[n_fold])
+                dists = self.classifier.compute_distances_no_loops(X_val_folds[n_fold])
+                y_val_pred = self.classifier.predict_labels(dists, k=k)
+                num_correct = np.sum(y_val_pred == y_val_folds[n_fold])
+                accuracy = float(num_correct) / y_val_folds[n_fold].shape[0]
+                if not k in k_to_accuracies:
+                    k_to_accuracies[k] = []
+                k_to_accuracies[k].append(accuracy)
+                print "k = {}".format(k)
+                print 'Got %d / %d correct => accuracy: %f' % (num_correct, y_val_folds[n_fold].shape[0], accuracy)
+               
+        
+        # Print out the computed accuracies
+        for k in sorted(k_to_accuracies):
+            for accuracy in k_to_accuracies[k]:
+                print 'k = %d, accuracy = %f' % (k, accuracy)
+        self.plot_observation(k_choices, k_to_accuracies)
+        return
+    def plot_observation(self, k_choices, k_to_accuracies):
+        # plot the raw observations
+        for k in k_choices:
+            accuracies = k_to_accuracies[k]
+            plt.scatter([k] * len(accuracies), accuracies)
+        
+        # plot the trend line with error bars that correspond to standard deviation
+        accuracies_mean = np.array([np.mean(v) for k,v in sorted(k_to_accuracies.items())])
+        accuracies_std = np.array([np.std(v) for k,v in sorted(k_to_accuracies.items())])
+        plt.errorbar(k_choices, accuracies_mean, yerr=accuracies_std)
+        plt.title('Cross-validation on k')
+        plt.xlabel('k')
+        plt.ylabel('Cross-validation accuracy')
+        max_index = np.argmax(accuracies_mean)
+        print "Best k = {}, maximum value ={}".format(k_choices[max_index], accuracies_mean[max_index])
+        plt.show()
+        return
+    def model_with_best_k(self):
+        # Based on the cross-validation results above, choose the best value for k,   
+        # retrain the classifier using all the training data, and test it on the test
+        # data. You should be able to get above 28% accuracy on the test data.
+        best_k = 10
+        
+        classifier = KNearestNeighbor()
+        classifier.train(self.X_train, self.y_train)
+        y_test_pred = classifier.predict(self.X_test, k=best_k)
+        
+        # Compute and display the accuracy
+        num_correct = np.sum(y_test_pred == self.y_test)
+        accuracy = float(num_correct) / self.num_test
+        print 'Got %d / %d correct => accuracy: %f' % (num_correct, self.num_test, accuracy)
+        return
     def run(self):
         self.load_data()
-#         self.visualize_data()
+#         self.visualize_data() 
         self.subsample_reshape()
         self.train()
 #         self.predict()
 #         self.compute_distance_noloop()
-        self.compare_vectorization_speed()
+#         self.compare_vectorization_speed()
+#         self.do_cross_validation()
+        self.model_with_best_k()
 #         self.compute_distance_oneloop()
         
         return
