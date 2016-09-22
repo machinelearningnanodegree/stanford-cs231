@@ -95,8 +95,9 @@ def svm_loss_vectorized(W, X, y, reg):
     scores = X.dot(W)
     class_scores = np.choose(y, scores.T).reshape(n_samples, 1)
 
-    mat_reference = np.tile(class_scores, n_classes)
-    margins = np.maximum(scores - mat_reference + delta, 0)
+    ##mat_reference = np.tile(class_scores, n_classes)
+    ##Commenting out the above line because with numpy broadcasting you won't need that
+    margins = np.maximum(scores - class_scores + delta, 0)
 
     loss = np.sum(margins)/n_samples
     loss += 0.5 * reg * np.sum(W * W)
