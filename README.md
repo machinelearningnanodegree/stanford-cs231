@@ -39,10 +39,10 @@ __Contributions__
 
 If you have finished the assignment, we hope you can add your answers to the repository for other students.  If you choose to do so, please fork the repo and add a folder with your alias and put the assignments inside your folder. 
 
-__Current Contributors__
+__Thanks to Current Contributors__
 
-@[kvn219](https://github.com/kvn219)
+[@kvn219](https://github.com/kvn219)
 
-@[LevinJ](https://github.com/LevinJ)
+[@LevinJ](https://github.com/LevinJ)
 
-@[pranayaryal](https://github.com/pranayaryal)
+[@pranayaryal](https://github.com/pranayaryal)
