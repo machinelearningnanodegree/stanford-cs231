@@ -1,7 +1,7 @@
 # Assignment 2 
 
 ## Thanks
-Could not have completed the assignments without help from other github users who have open sourced their code for the class.  In particular, much of the code in this assignment submission is based on repos provided by:
+Could not have completed the assignments without help from other github users who have open sourced their code for the class.  In particular, much of the code in this assignment is based on repos provided by:
 
 > 
 
