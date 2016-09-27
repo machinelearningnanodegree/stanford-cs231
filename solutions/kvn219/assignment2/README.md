@@ -1,7 +1,7 @@
 # Assignment 2 
 
 ## Thanks
-Could not have completed the assignments without help from other github users who have open sourced their code for the class.  In particular, much of the code in this assignment is based on repos provided by:
+Could not have completed the assignments without help from other github users who have open sourced their code for the class.  In particular, much of the code in this assignment is based on repos provided by: 
 
 > 
 
@@ -13,4 +13,4 @@ Could not have completed the assignments without help from other github users wh
 
 I suggest you check out their repos and give them a star for providing well documented and helpful code!
 
-
+TODO: Experiment section of the ConvolutionalNetworks.ipynb when I figure out how to get more computing power.
