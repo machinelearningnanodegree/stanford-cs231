@@ -7,20 +7,10 @@ Could not have completed the assignments without help from other github users wh
 
 - [cthorey](https://github.com/cthorey/CS231)
 
-- [OneRaynyDay](https://github.com/OneRaynyDayCS231n)
+- [OneRaynyDay](https://github.com/OneRaynyDay/CS231n/tree/master/assignment2)
 
-- [martinkersner](https://github.com/martinkersner/cs231)
+- [martinkersner](https://github.com/martinkersner/cs231n/tree/master/assignment2)
 
 I suggest you check out their repos and give them a star for providing well documented and helpful code!
-
-## Helpful Resources
-
-### Notes
-
-### Slides
-
-### Cheat sheet
-
-### Resources
 
 
