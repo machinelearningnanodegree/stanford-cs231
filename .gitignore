@@ -88,6 +88,7 @@ ENV/
 # Rope project settings
 .ropeproject
 
+solutions/levin/assignment1/features/temp
 #Pydev project files
 .project
 .pydevproject
