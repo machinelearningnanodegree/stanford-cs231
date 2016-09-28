@@ -60,7 +60,7 @@ class TwoLayerNet(object):
     - loss: Loss (data loss and regularization loss) for this batch of training
       samples.
     - grads: Dictionary mapping parameter names to gradients of those parameters
-      with respect to the loss function; has the same keys as self.params.
+      with respect to the loss function; has the same keys as self.params.lambda x: 1.0/(1.0 + np.exp(-x))
     """
     # Unpack variables from the params dictionary
     W1, b1 = self.params['W1'], self.params['b1']
@@ -79,7 +79,14 @@ class TwoLayerNet(object):
     #                              END OF YOUR CODE                             #
     #############################################################################
     
+    f= lambda x: 1.0/(1.0 + np.exp(-x))
+    h1 = f(np.dot(X, W1) + b1)
+    scores = f(np.dot(h1,W2) + b2)
+    
+   
+    
     # If the targets are not given then jump out, we're done
+    
     if y is None:
       return scores
 
