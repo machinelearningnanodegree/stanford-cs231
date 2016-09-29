@@ -89,6 +89,7 @@ ENV/
 .ropeproject
 
 solutions/levin/assignment1/features/temp
+solutions/levin/assignment1/features/logs/
 #Pydev project files
 .project
 .pydevproject
