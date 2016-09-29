@@ -13,6 +13,7 @@ from assignment1.cs231n.features import *
 from utility.dumpload import DumpLoad
 from assignment1.cs231n.classifiers.linear_classifier import LinearSVM
 from assignment1.cs231n.classifiers.neural_net import TwoLayerNet
+import cv2
 
 
 
@@ -44,6 +45,37 @@ class FeaturesModel(object):
         self.y_val = y_val
         self.X_test = X_test
         self.y_test = y_test
+        return
+    def save_sample_images(self):
+        cifar10_dir = '../cs231n/datasets/cifar-10-batches-py'
+        X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+        num_training = X_train.shape[0]
+        sample_indiecs = np.random.choice(num_training, size=5)
+        sample_images= X_train[sample_indiecs]
+        img_id = 0
+        for sample in sample_images:
+            img_id += 1
+            image_name = './temp/img_' + str(img_id) + '.jpg'
+            cv2.imwrite(image_name,sample)
+            
+        return
+    def explore_sift(self):
+        cifar10_dir = '../cs231n/datasets/cifar-10-batches-py'
+        X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+        sift_len = []
+        for img in X_train:
+            sift = cv2.SIFT()
+            gray= cv2.cvtColor(img.astype(np.uint8),cv2.COLOR_BGR2GRAY)
+            kp = sift.detect(gray,None)
+            kp,des = sift.compute(gray, kp)
+            if len(kp) == 0:
+                image_name = './temp/zero_sift'+ '.jpg'
+                cv2.imwrite(image_name, img)
+                return
+            sift_len.append(len(kp))
+        print min(sift_len)
+        print max(sift_len)
+        print np.mean(sift_len)
         return
     def extract_features(self):
         num_color_bins = 10 # Number of bins in the color histogram
@@ -162,9 +194,11 @@ class FeaturesModel(object):
         print test_acc
         return
     def run(self):
-        self.load_data()
+        self.explore_sift()
+#         self.save_sample_images()
+#         self.load_data()
 #         self.svm_classifier()
-        self.neural_network_classifier()
+#         self.neural_network_classifier()
         
         return
 
