@@ -49,6 +49,7 @@ cd stanford-cs231/solutions
 mkdir yourdirectoryname
 
 Copy the assignment1 into yourdirectoryname
+cd /stanford-cs231/
 cp -R /stanford-cs231/assignments/assignment1 /stanford-cs231/solutions/yourdirectoryname/assignment1
 If there is no directory called assignment1 in your directory it will be automatically created with above
 
