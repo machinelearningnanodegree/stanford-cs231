@@ -42,6 +42,7 @@ __Honor Code__
 __Contributions__
 
 If you have finished the assignment, we hope you can add your answers to the repository for other students.  If you choose to do so, please fork the repo and add a folder with your alias and put the assignments inside your folder. Always do a git pull before you do a git push so that there are no merge conflicts
+`git clone https://github.com/machinelearningnanodegree/stanford-cs231'`
 
 =======
 
