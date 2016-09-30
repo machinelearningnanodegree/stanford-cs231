@@ -81,7 +81,8 @@ class TwoLayerNet(object):
     
     f= lambda x: 1.0/(1.0 + np.exp(-x))
     h1 = f(np.dot(X, W1) + b1)
-    scores = f(np.dot(h1,W2) + b2)
+    h2 = f(np.dot(h1,W2) + b2)
+    print h2.shape
     
    
     
