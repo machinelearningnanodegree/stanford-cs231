@@ -48,8 +48,9 @@ git clone https://github.com/machinelearningnanodegree/stanford-cs231.git
 cd stanford-cs231/solutions
 mkdir yourdirectoryname
 
-Download the assignment1 from the website http://cs231n.github.io/assignments2016/assignment1/
-Unzip the folder and put it inside stanford-cs231/solutions/yourdirectoryname
+Copy the assignment1 into yourdirectoryname
+cp -R /stanford-cs231/assignments/assignment1 /stanford-cs231/solutions/yourdirectoryname/assignment1
+If there is no directory called assignment1 in your directory it will be automatically created with above
 
 Download the dataset by:
 cd yourdirectoryname/assignment1/cs231n/datasets
