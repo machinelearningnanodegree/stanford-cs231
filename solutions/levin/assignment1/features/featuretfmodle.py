@@ -24,8 +24,9 @@ class PrepareData(FeaturesModel):
 class FeatureTFModel(TFModel):
     def __init__(self):
         TFModel.__init__(self)
-        self.num_steps = 180
+        
         self.batch_size = 128
+        self.num_steps = self.batch_size*2
 
         self.summaries_dir = './logs/cifar'
         self.dropout= 1.0
@@ -118,12 +119,29 @@ class FeatureTFModel(TFModel):
             xs, ys = self.x_validation, self.y_validation
             k = 1.0
             return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+        if feed_type == "wholetrain":
+            xs, ys = self.x_train, self.y_train
+            k = 1.0
+            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
         # Now we are feeding test data into the neural network
         if feed_type == "test":
-            xs= self.x_test
+            xs, ys = self.x_test, self.y_test
             k = 1.0
-            return {self.x: xs, self.keep_prob: k}
-
+            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+    def debug_training(self, sess, step, train_metrics,train_loss):
+        if step % self.batch_size != 0:
+            return
+        summary, validation_loss, validation_metrics = sess.run([self.merged, self.loss, self.accuracy], feed_dict=self.feed_dict("validation"))
+        self.test_writer.add_summary(summary, step)
+#                     loss_train = sess.run(self.loss, feed_dict=self.feed_dict("validation_wholetrain"))
+        logging.info("Epoch {}/{}, train/test: {:.3f}/{:.3f}, train/test loss: {:.3f}/{:.3f}".format(step / self.batch_size, 
+                                                                                                     self.num_steps / self.batch_size, 
+                                                                                                     train_metrics, validation_metrics,\
+                                                                                                            train_loss, validation_loss))
+        return
+    def get_final_result(self, sess, feed_dict):
+        accuracy = sess.run(self.accuracy, feed_dict=feed_dict)
+        return accuracy
     def run_graph(self):
         logging.debug("computeGraph")
         with tf.Session(graph=self.graph) as sess:
@@ -132,13 +150,13 @@ class FeatureTFModel(TFModel):
             for step in range(1, self.num_steps + 1):
                 summary, _ , train_loss, train_metrics= sess.run([self.merged, self.train_step, self.loss, self.accuracy], feed_dict=self.feed_dict("train"))
                 self.train_writer.add_summary(summary, step)
+                self.debug_training(sess, step, train_metrics, train_loss)
                 
-                if step % 100 == 0:
-                    summary, validation_loss, validation_metrics = sess.run([self.merged, self.loss, self.accuracy], feed_dict=self.feed_dict("validation"))
-                    self.test_writer.add_summary(summary, step)
-#                     loss_train = sess.run(self.loss, feed_dict=self.feed_dict("validation_wholetrain"))
-                    logging.info("Step {}/{}, train/test: {:.3f}/{:.3f}, train/test loss: {:.3f}/{:.3f}".format(step, self.num_steps, train_metrics, validation_metrics,\
-                                                                                                                train_loss, validation_loss))
+     
+            train_accuracy = self.get_final_result(sess, self.feed_dict("wholetrain"))
+            val_accuracy = self.get_final_result(sess, self.feed_dict("validation"))
+            test_accuracy = self.get_final_result(sess, self.feed_dict("test"))
+            logging.info("train:{:.3f}, val:{:.3f},test:{:.3f}".format(train_accuracy, val_accuracy, test_accuracy))  
 #                     if self.get_stop_decisision(step, -validation_metrics):
 #                         logging.info("stop here due to early stopping")
 #                         return 
