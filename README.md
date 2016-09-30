@@ -54,7 +54,7 @@ If there is no directory called assignment1 in your directory it will be automat
 
 Download the dataset by:
 cd yourdirectoryname/assignment1/cs231n/datasets
-./get_datasets.sh
+run ./get_datasets.sh inside the datasets directory
 
 After everything is downloaded
 cd into the assignment1 directory backwards 
