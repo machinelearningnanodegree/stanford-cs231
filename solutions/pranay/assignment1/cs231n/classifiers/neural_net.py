@@ -79,10 +79,13 @@ class TwoLayerNet(object):
     #                              END OF YOUR CODE                             #
     #############################################################################
     
-    f= lambda x: 1.0/(1.0 + np.exp(-x))
-    h1 = f(np.dot(X, W1) + b1)
-    h2 = f(np.dot(h1,W2) + b2)
-    print h2.shape
+    
+    softmax = lambda x: n
+    relu = lambda x: np.maximum(0,x)
+    h1 = relu(np.dot(X, W1) + b1)
+    
+    scores = np.dot(h1,W2) + b2
+    
     
    
     

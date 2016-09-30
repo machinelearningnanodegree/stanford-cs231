@@ -24,9 +24,13 @@ Resources for students in the Udacity's Machine Learning Engineer Nanodegree to 
 
 3) Colah's [blog](http://colah.github.io/) on Neural Networks 
 
-4) Clément Thorey
-- [Convolutional neural networks](http://cthorey.github.io./backprop_conv/)
-- [Backpropagation and batchnorm regularization ](http://cthorey.github.io./backpropagation/)
+4) [Convolutional neural networks](http://cthorey.github.io./backprop_conv/)
+
+5) [Backpropagation and batchnorm regularization ](http://cthorey.github.io./backpropagation/)
+
+6) [How Convolutional Neural Networks Work](http://brohrer.github.io/how_convolutional_neural_networks_work.html)
+
+7) [Make Your Own Neural Network](https://github.com/makeyourownneuralnetwork/makeyourownneuralnetwork)
 
 ## Student Solutions
 A place for students to share code, double check their work and troubleshoot problems.  
@@ -43,9 +47,4 @@ If you have finished the assignment, we hope you can add your answers to the rep
 
 
 > __Thanks to Current Contributors__
-
-> [@kvn219](https://github.com/kvn219)
-
-> [@LevinJ](https://github.com/LevinJ)
-
-> [@pranayaryal](https://github.com/pranayaryal)
+[kvn219](https://github.com/kvn219), [LevinJ](https://github.com/LevinJ), & [pranayaryal](https://github.com/pranayaryal)
