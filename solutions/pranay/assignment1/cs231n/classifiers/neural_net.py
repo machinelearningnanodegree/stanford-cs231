@@ -80,7 +80,7 @@ class TwoLayerNet(object):
     #############################################################################
     
     
-    softmax = lambda x: n
+    
     relu = lambda x: np.maximum(0,x)
     h1 = relu(np.dot(X, W1) + b1)
     
@@ -96,6 +96,17 @@ class TwoLayerNet(object):
 
     # Compute the loss
     loss = None
+    normalized = np.exp(scores)/np.sum(np.exp(scores), axis=1, keepdims=True)
+    
+    true_class_prob = np.choose(y, normalized.T)
+   
+    loss = -np.log(true_class_prob)
+   
+    loss = np.average(loss)
+    
+    reg_loss = 0.5 * reg * np.sum(W1 * W1) + 0.5 * reg * np.sum(W2 * W2)
+    loss +=reg_loss
+    
     #############################################################################
     # TODO: Finish the forward pass, and compute the loss. This should include  #
     # both the data loss and L2 regularization for W1 and W2. Store the result  #

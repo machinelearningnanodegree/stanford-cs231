@@ -82,6 +82,7 @@ class TwoLayerNet(object):
 
         scores = np.dot(hidden_layer, W2) + b2
         scores += -np.max(scores)
+ 
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -100,8 +101,12 @@ class TwoLayerNet(object):
         #############################################################################
 
         exp_scores = np.exp(scores)
+        
         probs = exp_scores/np.sum(exp_scores, axis=1, keepdims=True)
+        
         class_logprobs = -np.log(probs[range(N), y])
+        
+        
         data_loss = np.sum(class_logprobs/N)
         reg_loss = 0.5 * reg * np.sum(W1 * W1) + 0.5 * reg * np.sum(W2 * W2)
         loss = data_loss + reg_loss
