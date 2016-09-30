@@ -37,7 +37,7 @@ A place for students to share code, double check their work and troubleshoot pro
 
 __Honor Code__
 
-> We ask that you not look at this section __unless you have finished the assignment or have spent quality time figuring out the problem.__  Out of respect for Stanford releasing their class to the public, please do not abuse this policy.  Try your best to figure out the solutions on your own, read the Reddit forms, or ask questions on our Slack channel before looking at solution code.  Personally, I like to spend a few days trying to figure something out before looking at solution code. 
+We ask that you not look at this section __unless you have finished the assignment or have spent quality time figuring out the problem.__  Out of respect for Stanford releasing their class to the public, please do not abuse this policy.  Try your best to figure out the solutions on your own, read the Reddit forms, or ask questions on our Slack channel before looking at solution code.  Personally, I like to spend a few days trying to figure something out before looking at solution code. 
 
 __Contributions__
 
@@ -64,5 +64,5 @@ and then run ipython notebook
 =======
 
 
-> __Thanks to Current Contributors__
+> __Thanks to Contributors:__
 [kvn219](https://github.com/kvn219), [LevinJ](https://github.com/LevinJ), & [pranayaryal](https://github.com/pranayaryal)
