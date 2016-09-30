@@ -44,10 +44,20 @@ __Contributions__
 If you have finished the assignment, we hope you can add your answers to the repository for other students.  If you choose to do so, please fork the repo and add a folder with your alias and put the assignments inside your folder. Always do a git pull before you do a git push so that there are no merge conflicts
 
 ```
-git clone https://github.com/machinelearningnanodegree/stanford-cs231
+git clone https://github.com/machinelearningnanodegree/stanford-cs231.git
 cd stanford-cs231/solutions
-mkdir yourname
+mkdir yourdirectoryname
 
+Download the assignment1 from the website http://cs231n.github.io/assignments2016/assignment1/
+Unzip the folder and put it inside stanford-cs231/solutions/yourdirectoryname
+
+Download the dataset by:
+cd yourdirectoryname/assignment1/cs231n/datasets
+./get_datasets.sh
+
+After everything is downloaded
+cd into the assignment1 directory backwards 
+and then run ipython notebook
 
 ```
 
