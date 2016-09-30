@@ -38,7 +38,7 @@ class FeatureTFModel(TFModel):
         self.merged = tf.merge_all_summaries()
         self.train_writer = tf.train.SummaryWriter(self.summaries_dir+ '/train',
                                         self.graph)
-        self.test_writer = tf.train.SummaryWriter(self.summaries_dir + '/test')
+        self.test_writer = tf.train.SummaryWriter(self.summaries_dir + '/val')
 
         return
     def get_input(self):
@@ -47,19 +47,12 @@ class FeatureTFModel(TFModel):
         # attached to the graph.
         prepare_data = PrepareData()
         num_class = 10
-        self.x_train, self.y_train,self.x_validation,self.y_validation, self.x_test,self.y_test,_= prepare_data.get_train_validationset()
+        self.x_train, self.y_train,self.x_validation,self.y_val, self.x_test,self.y_test,_= prepare_data.get_train_validationset()
         enc = OneHotEncoder(n_values=num_class, sparse=False)
 
         self.y_train  = enc.fit(self.y_train).transform(self.y_train )
-        self.y_validation  = enc.fit(self.y_validation).transform(self.y_validation )
+        self.y_val  = enc.fit(self.y_val).transform(self.y_val )
         self.y_test  = enc.fit(self.y_test).transform(self.y_test )
-#         self.y_train = tf.one_hot(self.y_train, num_class)
-#         self.y_validation = tf.one_hot(self.y_validation, num_class)
-#         self.y_test = tf.one_hot(self.y_test, num_class)
-#         self.x_train, self.y_train,self.x_validation,self.y_validation = self.x_train.as_matrix(), self.y_train.as_matrix().reshape((-1,1)),\
-#                                                                          self.x_validation.as_matrix(),self.y_validation.as_matrix().reshape((-1,1))
-#         self.x_train, self.y_train,self.x_validation,self.y_validation = self.x_train.astype(np.float32), self.y_train.astype(np.float32),\
-#                                                                          self.x_validation.astype(np.float32),self.y_validation.astype(np.float32)
         
         
         self.inputlayer_num = self.x_train.shape[1]
@@ -67,14 +60,14 @@ class FeatureTFModel(TFModel):
         
         # Input placehoolders
         with tf.name_scope('input'):
-            self.x = tf.placeholder(tf.float32, [None, self.inputlayer_num], name='x-input')
-            self.y_true = tf.placeholder(tf.float32, [None, self.outputlayer_num ], name='y-input')
+            self.x_placeholder = tf.placeholder(tf.float32, [None, self.inputlayer_num], name='x_placeholder-input')
+            self.y_true_placeholder = tf.placeholder(tf.float32, [None, self.outputlayer_num ], name='y-input')
         self.keep_prob = tf.placeholder(tf.float32, name='drop_out')
         
         return
     def add_inference_node(self):
         #output node self.pred
-        hidden1 = self.nn_layer(self.x, 500, 'layer1')
+        hidden1 = self.nn_layer(self.x_placeholder, 500, 'layer1')
         dropped = self.dropout_layer(hidden1)
         
         output_layer = self.nn_layer(dropped, self.outputlayer_num, 'layer2')
@@ -89,7 +82,7 @@ class FeatureTFModel(TFModel):
     def __add_crossentropy_loss(self):
         with tf.name_scope('loss'):
             with tf.name_scope('crossentropy'):
-                self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_true * tf.log(self.y_pred), reduction_indices=[1]))
+                self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_true_placeholder * tf.log(self.y_pred), reduction_indices=[1]))
             tf.scalar_summary('crossentropy', self.loss)
         return
     def add_optimizer_node(self):
@@ -101,7 +94,7 @@ class FeatureTFModel(TFModel):
         #output node self.accuracy
         with tf.name_scope('evaluationmetrics'):
             with tf.name_scope('correct_prediction'):
-                correct_prediction = tf.equal(tf.argmax(self.y_pred,1), tf.argmax(self.y_true,1))
+                correct_prediction = tf.equal(tf.argmax(self.y_pred,1), tf.argmax(self.y_true_placeholder,1))
             with tf.name_scope('accuracy'):
                 self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             tf.scalar_summary('accuracy', self.accuracy)
@@ -114,20 +107,20 @@ class FeatureTFModel(TFModel):
         if feed_type == "train":
             xs, ys = self.get_next_batch(self.x_train, self.y_train, self.batch_size)
             k = self.dropout
-            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
         if feed_type == "validation":
-            xs, ys = self.x_validation, self.y_validation
+            xs, ys = self.x_validation, self.y_val
             k = 1.0
-            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
         if feed_type == "wholetrain":
             xs, ys = self.x_train, self.y_train
             k = 1.0
-            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
         # Now we are feeding test data into the neural network
         if feed_type == "test":
             xs, ys = self.x_test, self.y_test
             k = 1.0
-            return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
     def debug_training(self, sess, step, train_metrics,train_loss):
         if step % self.batch_size != 0:
             return
@@ -162,7 +155,7 @@ class FeatureTFModel(TFModel):
 #                         return 
     
 #                     y_pred = sess.run(self.y_pred, feed_dict=self.feed_dict("validation"))
-#                     logging.info("validation mape :{:.3f}".format(mean_absolute_percentage_error(self.y_validation.reshape(-1), y_pred.reshape(-1))))
+#                     logging.info("validation mape :{:.3f}".format(mean_absolute_percentage_error(self.y_val.reshape(-1), y_pred.reshape(-1))))
         return
 
 

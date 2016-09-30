@@ -3,24 +3,24 @@ from random import randrange
 
 def eval_numerical_gradient(f, x, verbose=True, h=0.00001):
   """ 
-  a naive implementation of numerical gradient of f at x 
+  a naive implementation of numerical gradient of f at x_placeholder 
   - f should be a function that takes a single argument
-  - x is the point (numpy array) to evaluate the gradient at
+  - x_placeholder is the point (numpy array) to evaluate the gradient at
   """ 
 
   fx = f(x) # evaluate function value at original point
   grad = np.zeros_like(x)
-  # iterate over all indexes in x
+  # iterate over all indexes in x_placeholder
   it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
   while not it.finished:
 
-    # evaluate function at x+h
+    # evaluate function at x_placeholder+h
     ix = it.multi_index
     oldval = x[ix]
     x[ix] = oldval + h # increment by h
-    fxph = f(x) # evalute f(x + h)
+    fxph = f(x) # evalute f(x_placeholder + h)
     x[ix] = oldval - h
-    fxmh = f(x) # evaluate f(x - h)
+    fxmh = f(x) # evaluate f(x_placeholder - h)
     x[ix] = oldval # restore
 
     # compute the partial derivative with centered formula
@@ -44,9 +44,9 @@ def eval_numerical_gradient_array(f, x, df, h=1e-5):
     
     oldval = x[ix]
     x[ix] = oldval + h
-    pos = f(x).copy()
+    pos = f(x_placeholder).copy()
     x[ix] = oldval - h
-    neg = f(x).copy()
+    neg = f(x_placeholder).copy()
     x[ix] = oldval
     
     grad[ix] = np.sum((pos - neg) * df) / (2 * h)
@@ -62,9 +62,9 @@ def eval_numerical_gradient_blobs(f, inputs, output, h=1e-5):
   We assume that f accepts several input blobs as arguments, followed by a blob
   into which outputs will be written. For example, f might be called like this:
 
-  f(x, w, out)
+  f(x_placeholder, w, out)
   
-  where x and w are input Blobs, and the result of f will be written to out.
+  where x_placeholder and w are input Blobs, and the result of f will be written to out.
 
   Inputs: 
   - f: function
@@ -112,9 +112,9 @@ def grad_check_sparse(f, x, analytic_grad, num_checks=10, h=1e-5):
 
     oldval = x[ix]
     x[ix] = oldval + h # increment by h
-    fxph = f(x) # evaluate f(x + h)
+    fxph = f(x) # evaluate f(x_placeholder + h)
     x[ix] = oldval - h # increment by h
-    fxmh = f(x) # evaluate f(x - h)
+    fxmh = f(x) # evaluate f(x_placeholder - h)
     x[ix] = oldval # reset
 
     grad_numerical = (fxph - fxmh) / (2 * h)

@@ -135,21 +135,21 @@ class MnistTFModel(TFModel):
                                     fake_data=False)
         # Input placehoolders
         with tf.name_scope('input'):
-            self.x = tf.placeholder(tf.float32, [None, 784], name='x-input')
-            self.y_true = tf.placeholder(tf.float32, [None, 10], name='y-input')
+            self.x_placeholder = tf.placeholder(tf.float32, [None, 784], name='x_placeholder-input')
+            self.y_true_placeholder = tf.placeholder(tf.float32, [None, 10], name='y-input')
         self.keep_prob = tf.placeholder(tf.float32, name='drop_out')
         # below is just for the sake of visualization
         with tf.name_scope('input_reshape'):
-            image_shaped_input = tf.reshape(self.x, [-1, 28, 28, 1])
+            image_shaped_input = tf.reshape(self.x_placeholder, [-1, 28, 28, 1])
             tf.image_summary('input', image_shaped_input, 10)
         
         return
     def add_inference_node(self):
         #output node self.pred
-#         hidden1 = self.nn_layer(self.x, 784, 500, 'layer1')
+#         hidden1 = self.nn_layer(self.x_placeholder, 784, 500, 'layer1')
 #         dropped = self.dropout_layer(hidden1)
 #         self.y_pred = self.nn_layer(dropped, 500, 10, 'layer2', act=tf.nn.softmax)
-        hidden1 = self.nn_layer(self.x, 500, 'layer1')
+        hidden1 = self.nn_layer(self.x_placeholder, 500, 'layer1')
         dropped = self.dropout_layer(hidden1)
         
         hidden1 = self.nn_layer(dropped, 200, 'layer2')
@@ -160,7 +160,7 @@ class MnistTFModel(TFModel):
     def add_loss_node(self):
         #output node self.loss
         with tf.name_scope('loss'):
-            diff = self.y_true * tf.log(self.y_pred)
+            diff = self.y_true_placeholder * tf.log(self.y_pred)
             with tf.name_scope('total'):
                 self.loss = -tf.reduce_mean(diff)
             tf.scalar_summary('cross entropy', self.loss)
@@ -175,7 +175,7 @@ class MnistTFModel(TFModel):
         #output node self.accuracy
         with tf.name_scope('evaluationmetrics'):
             with tf.name_scope('correct_prediction'):
-                correct_prediction = tf.equal(tf.argmax(self.y_pred, 1), tf.argmax(self.y_true, 1))
+                correct_prediction = tf.equal(tf.argmax(self.y_pred, 1), tf.argmax(self.y_true_placeholder, 1))
             with tf.name_scope('accuracy'):
                 self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             tf.scalar_summary('accuracy', self.accuracy)
@@ -191,7 +191,7 @@ class MnistTFModel(TFModel):
         else:
             xs, ys = self.mnist.test.images, self.mnist.test.labels
             k = 1.0
-        return {self.x: xs, self.y_true: ys, self.keep_prob: k}
+        return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
 
     def run_graph(self):
         logging.debug("computeGraph")
