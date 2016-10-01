@@ -79,12 +79,12 @@ class TwoLayerNet(object):
     #                              END OF YOUR CODE                             #
     #############################################################################
     
+    num_examples = X.shape[0]
+   
     
+    hidden_layer = np.maximum(0, np.dot(X, W1) + b1)
     
-    relu = lambda x: np.maximum(0,x)
-    h1 = relu(np.dot(X, W1) + b1)
-    
-    scores = np.dot(h1,W2) + b2
+    scores = np.dot(hidden_layer,W2) + b2
     
     
    
@@ -99,6 +99,8 @@ class TwoLayerNet(object):
     normalized = np.exp(scores)/np.sum(np.exp(scores), axis=1, keepdims=True)
     
     true_class_prob = np.choose(y, normalized.T)
+    
+    
    
     loss = -np.log(true_class_prob)
    
@@ -121,6 +123,21 @@ class TwoLayerNet(object):
 
     # Backward pass: compute gradients
     grads = {}
+    dscores = normalized
+    dscores[range(num_examples), y] -= 1
+    dscores /= num_examples
+    dW2 = np.dot(hidden_layer.T, dscores)
+    dW2 += reg * W2
+    db2 = np.sum(dscores, axis = 0, keepdims = True)
+    dhidden = np.dot(dscores, W2.T)
+    dhidden[hidden_layer<=0] = 0
+    dW1 = np.dot(X.T, dhidden)
+    dW1 += reg * W1
+    db1 = np.sum(dhidden, axis=0, keepdims=True)
+    grads['W1'] = dW1 
+    grads['W2'] = dW2
+    grads['b1'] = db1
+    grads['b2'] = db2
     #############################################################################
     # TODO: Compute the backward pass, computing the derivatives of the weights #
     # and biases. Store the results in the grads dictionary. For example,       #
