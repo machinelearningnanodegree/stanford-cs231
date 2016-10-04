@@ -180,21 +180,28 @@ class TwoLayerNet(object):
     val_acc_history = []
 
     for it in xrange(num_iters):
-      X_batch = None
-      y_batch = None
+        X_batch = None
+        y_batch = None
+        
+        idx = np.random.choice(np.arange(X.shape[1]), batch_size, replace=True)
+        X_batch = X[:,idx]
+        y_batch = y[idx]
+                               
+
 
       #########################################################################
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+        
+      
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
 
       # Compute loss and gradients using the current minibatch
-      loss, grads = self.loss(X_batch, y=y_batch, reg=reg)
-      loss_history.append(loss)
+        loss, grads = self.loss(X_batch.T, y=y_batch, reg=reg)
+        loss_history.append(loss)
 
       #########################################################################
       # TODO: Use the gradients in the grads dictionary to update the         #
@@ -202,30 +209,29 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
 
-      if verbose and it % 100 == 0:
-        print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
+        if verbose and it % 100 == 0:
+            print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
+            # Every epoch, check train and val accuracy and decay learning rate.
+            if it % iterations_per_epoch == 0:
+                # Check accuracy
+                train_acc = (self.predict(X_batch) == y_batch).mean()
+                val_acc = (self.predict(X_val) == y_val).mean()
+                train_acc_history.append(train_acc)
+                val_acc_history.append(val_acc)
+                # Decay learning rate
+                learning_rate *= learning_rate_decay
+                print X_batch.shape
 
-      # Every epoch, check train and val accuracy and decay learning rate.
-      if it % iterations_per_epoch == 0:
-        # Check accuracy
-        train_acc = (self.predict(X_batch) == y_batch).mean()
-        val_acc = (self.predict(X_val) == y_val).mean()
-        train_acc_history.append(train_acc)
-        val_acc_history.append(val_acc)
-
-        # Decay learning rate
-        learning_rate *= learning_rate_decay
-
-    return {
-      'loss_history': loss_history,
-      'train_acc_history': train_acc_history,
-      'val_acc_history': val_acc_history,
-    }
+                return {
+                  'loss_history': loss_history,
+                  'train_acc_history': train_acc_history,
+                  'val_acc_history': val_acc_history,
+                }
 
   def predict(self, X):
     """
