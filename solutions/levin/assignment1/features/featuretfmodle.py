@@ -25,8 +25,8 @@ class FeatureTFModel(TFModel):
     def __init__(self):
         TFModel.__init__(self)
         
-        self.batch_size = 128
-        self.num_steps = self.batch_size*2
+        self.batch_size = 200
+        self.num_steps = self.batch_size*9
 
         self.summaries_dir = './logs/cifar'
         self.dropout= 1.0
@@ -85,10 +85,29 @@ class FeatureTFModel(TFModel):
                 self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_true_placeholder * tf.log(self.y_pred), reduction_indices=[1]))
             tf.scalar_summary('crossentropy', self.loss)
         return
+    def euclidean_norm(self, tensor):
+        with tf.name_scope("euclidean_norm"): #need to have this for tf to work
+            squareroot_tensor = tf.square(tensor)
+            euclidean_norm = tf.sqrt(tf.reduce_sum(squareroot_tensor))
+            return euclidean_norm
     def add_optimizer_node(self):
         #output node self.train_step
         with tf.name_scope('train'):
-            self.train_step = tf.train.AdamOptimizer(5.0e-4).minimize(self.loss)
+#             optimizer = tf.train.AdamOptimizer(5.0e-5)
+            optimizer = tf.train.GradientDescentOptimizer(5.0e-1)
+            grads_and_vars = optimizer.compute_gradients(self.loss)
+            self.ratio_w1 = self.euclidean_norm(grads_and_vars[0][0])/self.euclidean_norm(grads_and_vars[0][1])
+            self.ratio_w2 = self.euclidean_norm(grads_and_vars[2][0])/self.euclidean_norm(grads_and_vars[2][1])
+#             grads = [item[0] for item in grads_and_vars]
+#             vars   = [item[1] for item in grads_and_vars]
+#             grads_l2norm = [self.euclidean_norm(item) for item in grads]
+#             vars_l2norm = [self.euclidean_norm(item) for item in vars]
+#             self.param_udpate_ratio = [] 
+#             for i in range(len(grads_l2norm)):
+#                 self.param_udpate_ratio.append(grads_l2norm[i] / vars_l2norm[i])
+            
+            self.train_step = optimizer.apply_gradients(grads_and_vars)
+#             self.train_step = .minimize(self.loss)
         return
     def add_accuracy_node(self):
         #output node self.accuracy
@@ -121,7 +140,7 @@ class FeatureTFModel(TFModel):
             xs, ys = self.x_test, self.y_test
             k = 1.0
             return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
-    def debug_training(self, sess, step, train_metrics,train_loss):
+    def debug_training(self, sess, step, train_metrics,train_loss,ratio_w1, ratio_w2):
         if step % self.batch_size != 0:
             return
         summary, validation_loss, validation_metrics = sess.run([self.merged, self.loss, self.accuracy], feed_dict=self.feed_dict("validation"))
@@ -131,6 +150,7 @@ class FeatureTFModel(TFModel):
                                                                                                      self.num_steps / self.batch_size, 
                                                                                                      train_metrics, validation_metrics,\
                                                                                                             train_loss, validation_loss))
+        logging.info("w1 update ration:{:.1e}, w2 update ration:{:.1e}".format(ratio_w1, ratio_w2))
         return
     def get_final_result(self, sess, feed_dict):
         accuracy = sess.run(self.accuracy, feed_dict=feed_dict)
@@ -140,10 +160,10 @@ class FeatureTFModel(TFModel):
         with tf.Session(graph=self.graph) as sess:
             tf.initialize_all_variables().run()
             logging.debug("Initialized")
-            for step in range(1, self.num_steps + 1):
-                summary, _ , train_loss, train_metrics= sess.run([self.merged, self.train_step, self.loss, self.accuracy], feed_dict=self.feed_dict("train"))
+            for step in range(0, self.num_steps + 1):
+                summary, ratio_w1, ratio_w2, _ , train_loss, train_metrics =sess.run([self.merged, self.ratio_w1, self.ratio_w2,self.train_step, self.loss, self.accuracy], feed_dict=self.feed_dict("train"))
                 self.train_writer.add_summary(summary, step)
-                self.debug_training(sess, step, train_metrics, train_loss)
+                self.debug_training(sess, step, train_metrics, train_loss,ratio_w1, ratio_w2)
                 
      
             train_accuracy = self.get_final_result(sess, self.feed_dict("wholetrain"))
