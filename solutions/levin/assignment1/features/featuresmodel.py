@@ -194,11 +194,11 @@ class FeaturesModel(object):
         print test_acc
         return
     def run(self):
-        self.explore_sift()
+#         self.explore_sift()
 #         self.save_sample_images()
-#         self.load_data()
+        self.load_data()
 #         self.svm_classifier()
-#         self.neural_network_classifier()
+        self.neural_network_classifier()
         
         return
 

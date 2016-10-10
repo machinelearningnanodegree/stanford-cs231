@@ -1,19 +1,13 @@
 import tensorflow as tf
 import numpy as np
 import logging
-from bokeh.util.logconfig import level
 import sys
 
-from tensorflow.examples.tutorials.mnist import input_data
 
 
     
 class TFModel(object):
     def __init__(self):
-        self.num_steps = 100
-        self.batch_size = 100
-        self.summaries_dir = '/tmp/mnist_logs2'
-        self.dropout= 0.9
         root = logging.getLogger()
         root.addHandler(logging.StreamHandler(sys.stdout))
         root.setLevel(logging.DEBUG)
@@ -76,8 +70,7 @@ class TFModel(object):
     def dropout_layer(self, to_be_dropped_layer):
         layer_id = int(to_be_dropped_layer.name.split('/')[0][-1])
         with tf.name_scope('dropout' + str(layer_id)):
-#             tf.scalar_summary('dropout_keep_probability' + str(layer_id), self.keep_prob)
-            dropped = tf.nn.dropout(to_be_dropped_layer, self.keep_prob)
+            dropped = tf.nn.dropout(to_be_dropped_layer, self.keep_prob_placeholder)
             return dropped
 
     def add_inference_node(self):
@@ -112,103 +105,3 @@ class TFModel(object):
         self.__build_graph()
         self.run_graph()
         return
-    
-    
-class MnistTFModel(TFModel):
-    def __init__(self):
-        TFModel.__init__(self)
-        return
-    def add_visualize_node(self):
-        # Merge all the summaries and write them out to /tmp/mnist_logs (by default)
-        self.merged = tf.merge_all_summaries()
-        self.train_writer = tf.train.SummaryWriter(self.summaries_dir+ '/train',
-                                        self.graph)
-        self.test_writer = tf.train.SummaryWriter(self.summaries_dir + '/test')
-
-        return
-    def get_input(self):
-        # Input data.
-        # Load the training, validation and test data into constants that are
-        # attached to the graph.
-        self.mnist = input_data.read_data_sets('data',
-                                    one_hot=True,
-                                    fake_data=False)
-        # Input placehoolders
-        with tf.name_scope('input'):
-            self.x_placeholder = tf.placeholder(tf.float32, [None, 784], name='x_placeholder-input')
-            self.y_true_placeholder = tf.placeholder(tf.float32, [None, 10], name='y-input')
-        self.keep_prob = tf.placeholder(tf.float32, name='drop_out')
-        # below is just for the sake of visualization
-        with tf.name_scope('input_reshape'):
-            image_shaped_input = tf.reshape(self.x_placeholder, [-1, 28, 28, 1])
-            tf.image_summary('input', image_shaped_input, 10)
-        
-        return
-    def add_inference_node(self):
-        #output node self.pred
-#         hidden1 = self.nn_layer(self.x_placeholder, 784, 500, 'layer1')
-#         dropped = self.dropout_layer(hidden1)
-#         self.y_pred = self.nn_layer(dropped, 500, 10, 'layer2', act=tf.nn.softmax)
-        hidden1 = self.nn_layer(self.x_placeholder, 500, 'layer1')
-        dropped = self.dropout_layer(hidden1)
-        
-        hidden1 = self.nn_layer(dropped, 200, 'layer2')
-        dropped = self.dropout_layer(hidden1)
-        
-        self.y_pred = self.nn_layer(dropped, 10, 'layer3', act=tf.nn.softmax)
-        return
-    def add_loss_node(self):
-        #output node self.loss
-        with tf.name_scope('loss'):
-            diff = self.y_true_placeholder * tf.log(self.y_pred)
-            with tf.name_scope('total'):
-                self.loss = -tf.reduce_mean(diff)
-            tf.scalar_summary('cross entropy', self.loss)
-        return
-    
-    def add_optimizer_node(self):
-        #output node self.train_step
-        with tf.name_scope('train'):
-            self.train_step = tf.train.AdamOptimizer(0.001).minimize(self.loss)
-        return
-    def add_accuracy_node(self):
-        #output node self.accuracy
-        with tf.name_scope('evaluationmetrics'):
-            with tf.name_scope('correct_prediction'):
-                correct_prediction = tf.equal(tf.argmax(self.y_pred, 1), tf.argmax(self.y_true_placeholder, 1))
-            with tf.name_scope('accuracy'):
-                self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            tf.scalar_summary('accuracy', self.accuracy)
-        return
-    def add_evalmetrics_node(self):
-        self.add_accuracy_node()
-        return
-    def feed_dict(self,train):
-        """Make a TensorFlow feed_dict: maps data onto Tensor placeholders."""
-        if train:
-            xs, ys = self.mnist.train.next_batch(self.batch_size)
-            k = self.dropout
-        else:
-            xs, ys = self.mnist.test.images, self.mnist.test.labels
-            k = 1.0
-        return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
-
-    def run_graph(self):
-        logging.debug("computeGraph")
-        with tf.Session(graph=self.graph) as sess:
-            tf.initialize_all_variables().run()
-            logging.debug("Initialized")
-            for step in range(self.num_steps + 1):
-                summary, _ , acc_train= sess.run([self.merged, self.train_step, self.accuracy], feed_dict=self.feed_dict(True))
-                self.train_writer.add_summary(summary, step)
-                
-                if step % 10 == 0:
-                    summary, acc_test = sess.run([self.merged, self.accuracy], feed_dict=self.feed_dict(False))
-                    self.test_writer.add_summary(summary, step)
-                    logging.info("Step {}/{}, train: {:.3f}, test {:.3f}".format(step, self.num_steps, acc_train, acc_test))
-        return
-
-
-if __name__ == "__main__":   
-    obj= MnistTFModel()
-    obj.run()

@@ -20,16 +20,17 @@ class PrepareData(FeaturesModel):
         self.y_train = self.y_train.reshape(-1, 1)
         self.y_val = self.y_val.reshape(-1, 1)
         self.y_test = self.y_test.reshape(-1, 1)
+        logging.info("train:{}, val:{}, test{}:".format(self.y_train.shape, self.y_val.shape, self.y_test.shape))
         return self.X_train_feats, self.y_train, self.X_val_feats,self.y_val, self.X_test_feats,self.y_test,self.X_test
 class FeatureTFModel(TFModel):
     def __init__(self):
         TFModel.__init__(self)
         
-        self.batch_size = 200
-        self.num_steps = self.batch_size*9
+        self.batch_size = 128
+        self.num_steps = self.batch_size*20
 
         self.summaries_dir = './logs/cifar'
-        self.dropout= 1.0
+        self.keep_dropout= 1.0
        
         logging.getLogger().addHandler(logging.FileHandler('logs/cifarnerual.log', mode='w'))
         return
@@ -62,7 +63,7 @@ class FeatureTFModel(TFModel):
         with tf.name_scope('input'):
             self.x_placeholder = tf.placeholder(tf.float32, [None, self.inputlayer_num], name='x_placeholder-input')
             self.y_true_placeholder = tf.placeholder(tf.float32, [None, self.outputlayer_num ], name='y-input')
-        self.keep_prob = tf.placeholder(tf.float32, name='drop_out')
+        self.keep_prob_placeholder = tf.placeholder(tf.float32, name='drop_out')
         
         return
     def add_inference_node(self):
@@ -93,11 +94,11 @@ class FeatureTFModel(TFModel):
     def add_optimizer_node(self):
         #output node self.train_step
         with tf.name_scope('train'):
-#             optimizer = tf.train.AdamOptimizer(5.0e-5)
-            optimizer = tf.train.GradientDescentOptimizer(5.0e-1)
-            grads_and_vars = optimizer.compute_gradients(self.loss)
-            self.ratio_w1 = self.euclidean_norm(grads_and_vars[0][0])/self.euclidean_norm(grads_and_vars[0][1])
-            self.ratio_w2 = self.euclidean_norm(grads_and_vars[2][0])/self.euclidean_norm(grads_and_vars[2][1])
+            optimizer = tf.train.AdamOptimizer(1.0e-3)
+#             optimizer = tf.train.GradientDescentOptimizer(5.0e-1)
+#             grads_and_vars = optimizer.compute_gradients(self.loss)
+#             self.ratio_w1 = self.euclidean_norm(grads_and_vars[0][0])/self.euclidean_norm(grads_and_vars[0][1])
+#             self.ratio_w2 = self.euclidean_norm(grads_and_vars[2][0])/self.euclidean_norm(grads_and_vars[2][1])
 #             grads = [item[0] for item in grads_and_vars]
 #             vars   = [item[1] for item in grads_and_vars]
 #             grads_l2norm = [self.euclidean_norm(item) for item in grads]
@@ -106,8 +107,8 @@ class FeatureTFModel(TFModel):
 #             for i in range(len(grads_l2norm)):
 #                 self.param_udpate_ratio.append(grads_l2norm[i] / vars_l2norm[i])
             
-            self.train_step = optimizer.apply_gradients(grads_and_vars)
-#             self.train_step = .minimize(self.loss)
+#             self.train_step = optimizer.apply_gradients(grads_and_vars)
+            self.train_step = optimizer.minimize(self.loss)
         return
     def add_accuracy_node(self):
         #output node self.accuracy
@@ -125,32 +126,31 @@ class FeatureTFModel(TFModel):
         """Make a TensorFlow feed_dict: maps data onto Tensor placeholders."""
         if feed_type == "train":
             xs, ys = self.get_next_batch(self.x_train, self.y_train, self.batch_size)
-            k = self.dropout
-            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
+            k = self.keep_dropout
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob_placeholder: k}
         if feed_type == "validation":
             xs, ys = self.x_validation, self.y_val
             k = 1.0
-            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob_placeholder: k}
         if feed_type == "wholetrain":
             xs, ys = self.x_train, self.y_train
             k = 1.0
-            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob_placeholder: k}
         # Now we are feeding test data into the neural network
         if feed_type == "test":
             xs, ys = self.x_test, self.y_test
             k = 1.0
-            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob: k}
-    def debug_training(self, sess, step, train_metrics,train_loss,ratio_w1, ratio_w2):
+            return {self.x_placeholder: xs, self.y_true_placeholder: ys, self.keep_prob_placeholder: k}
+    def debug_training(self, sess, step, train_metrics,train_loss):
         if step % self.batch_size != 0:
             return
         summary, validation_loss, validation_metrics = sess.run([self.merged, self.loss, self.accuracy], feed_dict=self.feed_dict("validation"))
         self.test_writer.add_summary(summary, step)
-#                     loss_train = sess.run(self.loss, feed_dict=self.feed_dict("validation_wholetrain"))
-        logging.info("Epoch {}/{}, train/test: {:.3f}/{:.3f}, train/test loss: {:.3f}/{:.3f}".format(step / self.batch_size, 
+        logging.info("Epoch {}/{}, train/val: {:.3f}/{:.3f}, train/val loss: {:.3f}/{:.3f}".format(step / self.batch_size, 
                                                                                                      self.num_steps / self.batch_size, 
                                                                                                      train_metrics, validation_metrics,\
                                                                                                             train_loss, validation_loss))
-        logging.info("w1 update ration:{:.1e}, w2 update ration:{:.1e}".format(ratio_w1, ratio_w2))
+
         return
     def get_final_result(self, sess, feed_dict):
         accuracy = sess.run(self.accuracy, feed_dict=feed_dict)
@@ -161,21 +161,15 @@ class FeatureTFModel(TFModel):
             tf.initialize_all_variables().run()
             logging.debug("Initialized")
             for step in range(0, self.num_steps + 1):
-                summary, ratio_w1, ratio_w2, _ , train_loss, train_metrics =sess.run([self.merged, self.ratio_w1, self.ratio_w2,self.train_step, self.loss, self.accuracy], feed_dict=self.feed_dict("train"))
+                summary,  _ , train_loss, train_metrics =sess.run([self.merged, self.train_step, self.loss, self.accuracy], feed_dict=self.feed_dict("train"))
                 self.train_writer.add_summary(summary, step)
-                self.debug_training(sess, step, train_metrics, train_loss,ratio_w1, ratio_w2)
+                self.debug_training(sess, step, train_metrics, train_loss)
                 
      
             train_accuracy = self.get_final_result(sess, self.feed_dict("wholetrain"))
             val_accuracy = self.get_final_result(sess, self.feed_dict("validation"))
             test_accuracy = self.get_final_result(sess, self.feed_dict("test"))
             logging.info("train:{:.3f}, val:{:.3f},test:{:.3f}".format(train_accuracy, val_accuracy, test_accuracy))  
-#                     if self.get_stop_decisision(step, -validation_metrics):
-#                         logging.info("stop here due to early stopping")
-#                         return 
-    
-#                     y_pred = sess.run(self.y_pred, feed_dict=self.feed_dict("validation"))
-#                     logging.info("validation mape :{:.3f}".format(mean_absolute_percentage_error(self.y_val.reshape(-1), y_pred.reshape(-1))))
         return
 
 
