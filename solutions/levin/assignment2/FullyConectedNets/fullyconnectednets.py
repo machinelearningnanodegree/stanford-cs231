@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from assignment2.cs231n.layers import affine_forward
 from assignment2.cs231n.layers import affine_backward
+from assignment2.cs231n.layers import relu_forward
+from assignment2.cs231n.layers import relu_backward
 from assignment2.cs231n.classifiers.fc_net import *
 from assignment2.cs231n.data_utils import get_CIFAR10_data
 from assignment2.cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
@@ -69,9 +71,39 @@ class FullyConnectedNets(object):
         print 'dw error: ', self.rel_error(dw_num, dw)
         print 'db error: ', self.rel_error(db_num, db)
         return
+    def test_relu_forward(self):
+        # Test the relu_forward function
+
+        x = np.linspace(-0.5, 0.5, num=12).reshape(3, 4)
+        
+        out, _ = relu_forward(x)
+        correct_out = np.array([[ 0.,          0.,          0.,          0.,        ],
+                                [ 0.,          0.,          0.04545455,  0.13636364,],
+                                [ 0.22727273,  0.31818182,  0.40909091,  0.5,       ]])
+        
+        # Compare your output with ours. The error should be around 1e-8
+        print 'Testing relu_forward function:'
+        print 'difference: ', self.rel_error(out, correct_out)
+        return
+    def test_relu_backward(self):
+        x = np.random.randn(10, 10)
+        dout = np.random.randn(*x.shape)
+        
+        dx_num = eval_numerical_gradient_array(lambda x: relu_forward(x)[0], x, dout)
+        
+        _, cache = relu_forward(x)
+        dx = relu_backward(dout, cache)
+        
+        # The error should be around 1e-12
+        print 'Testing relu_backward function:'
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        return
+    
     def run(self):
-        self.test_affine_forward()
-        self.test_affine_backward()
+#         self.test_affine_forward()
+#         self.test_affine_backward()
+#         self.test_relu_forward()
+        self.test_relu_backward()
         return
 
 
