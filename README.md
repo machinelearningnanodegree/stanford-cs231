@@ -1,6 +1,6 @@
-#  Udacity Study Group for CS231n 
+#  Convolutional Neural Networks for Visual Recognition 
 
-Resources for students in the Udacity's Machine Learning Engineer Nanodegree to work through Stanford's Convolutional Neural Networks for Visual Recognition course. 
+Resources for students in the [Udacity's Machine Learning Engineer Nanodegree](https://www.udacity.com/course/machine-learning-engineer-nanodegree--nd009) to work through Stanford's Convolutional Neural Networks for Visual Recognition course. 
 
 ## Course Materials
 
@@ -18,19 +18,19 @@ Resources for students in the Udacity's Machine Learning Engineer Nanodegree to 
 
 ## Helpful Resources
 
-1) Andrej Karpathy's [blog](http://karpathy.github.io/)
+[Andrej Karpathy's blog](http://karpathy.github.io/)
 
-2) Andrew Trask's [blog](http://iamtrask.github.io/)
+[Andrew Trask's blog](http://iamtrask.github.io/)
 
-3) Colah's [blog](http://colah.github.io/) on Neural Networks 
+[Christopher Olah's blog on Neural Networks](http://colah.github.io/) 
 
-4) [Convolutional neural networks](http://cthorey.github.io./backprop_conv/)
+[Convolutional neural networks](http://cthorey.github.io./backprop_conv/)
 
-5) [Backpropagation and batchnorm regularization ](http://cthorey.github.io./backpropagation/)
+[Backpropagation and batchnorm regularization ](http://cthorey.github.io./backpropagation/)
 
-6) [How Convolutional Neural Networks Work](http://brohrer.github.io/how_convolutional_neural_networks_work.html)
+[How Convolutional Neural Networks Work](http://brohrer.github.io/how_convolutional_neural_networks_work.html)
 
-7) [Make Your Own Neural Network](https://github.com/makeyourownneuralnetwork/makeyourownneuralnetwork)
+[Make Your Own Neural Network](https://github.com/makeyourownneuralnetwork/makeyourownneuralnetwork)
 
 ## Student Solutions
 A place for students to share code, double check their work and troubleshoot problems.  
