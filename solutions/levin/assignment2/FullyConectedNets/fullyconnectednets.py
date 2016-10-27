@@ -11,6 +11,8 @@ from assignment2.cs231n.layers import affine_forward
 from assignment2.cs231n.layers import affine_backward
 from assignment2.cs231n.layers import relu_forward
 from assignment2.cs231n.layers import relu_backward
+from assignment2.cs231n.layers import svm_loss
+from assignment2.cs231n.layers import softmax_loss
 from assignment2.cs231n.classifiers.fc_net import *
 from assignment2.cs231n.data_utils import get_CIFAR10_data
 from assignment2.cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
@@ -117,12 +119,35 @@ class FullyConnectedNets(object):
         print 'dw error: ', self.rel_error(dw_num, dw)
         print 'db error: ', self.rel_error(db_num, db)
         return
+    def test_loss_layer_propogation(self):
+        num_classes, num_inputs = 10, 50
+        x = 0.001 * np.random.randn(num_inputs, num_classes)
+        y = np.random.randint(num_classes, size=num_inputs)
+        
+        dx_num = eval_numerical_gradient(lambda x: svm_loss(x, y)[0], x, verbose=False)
+        loss, dx = svm_loss(x, y)
+        
+        # Test svm_loss function. Loss should be around 9 and dx error should be 1e-9
+        print 'Testing svm_loss:'
+        print 'loss: ', loss
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        
+        dx_num = eval_numerical_gradient(lambda x: softmax_loss(x, y)[0], x, verbose=False)
+        loss, dx = softmax_loss(x, y)
+        
+        # Test softmax_loss function. Loss should be 2.3 and dx error should be 1e-8
+        print '\nTesting softmax_loss:'
+        print 'loss: ', loss
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        return
+    
     def run(self):
 #         self.test_affine_forward()
 #         self.test_affine_backward()
 #         self.test_relu_forward()
 #         self.test_relu_backward()
-        self.test_affine_relu()
+#         self.test_affine_relu()
+        self.test_loss_layer_propogation()
         return
 
 
