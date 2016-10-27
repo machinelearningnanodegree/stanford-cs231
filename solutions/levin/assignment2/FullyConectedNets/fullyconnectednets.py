@@ -15,6 +15,7 @@ from assignment2.cs231n.classifiers.fc_net import *
 from assignment2.cs231n.data_utils import get_CIFAR10_data
 from assignment2.cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
 from assignment2.cs231n.solver import Solver
+from assignment2.cs231n.layer_utils import affine_relu_forward, affine_relu_backward
 
 
 
@@ -98,12 +99,30 @@ class FullyConnectedNets(object):
         print 'Testing relu_backward function:'
         print 'dx error: ', self.rel_error(dx_num, dx)
         return
-    
+    def test_affine_relu(self):
+        x = np.random.randn(2, 3, 4)
+        w = np.random.randn(12, 10)
+        b = np.random.randn(10)
+        dout = np.random.randn(2, 10)
+        
+        out, cache = affine_relu_forward(x, w, b)
+        dx, dw, db = affine_relu_backward(dout, cache)
+        
+        dx_num = eval_numerical_gradient_array(lambda x: affine_relu_forward(x, w, b)[0], x, dout)
+        dw_num = eval_numerical_gradient_array(lambda w: affine_relu_forward(x, w, b)[0], w, dout)
+        db_num = eval_numerical_gradient_array(lambda b: affine_relu_forward(x, w, b)[0], b, dout)
+        
+        print 'Testing affine_relu_forward:'
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        print 'dw error: ', self.rel_error(dw_num, dw)
+        print 'db error: ', self.rel_error(db_num, db)
+        return
     def run(self):
 #         self.test_affine_forward()
 #         self.test_affine_backward()
 #         self.test_relu_forward()
-        self.test_relu_backward()
+#         self.test_relu_backward()
+        self.test_affine_relu()
         return
 
 
