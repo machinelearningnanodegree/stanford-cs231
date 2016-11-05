@@ -319,7 +319,7 @@ class FullyConnectedNets(object):
         }
         
         
-        learning_rate = 2e-3
+        learning_rate = 1e-3
         weight_scale = 5e-2
         model = FullyConnectedNet([100, 100],
                       weight_scale=weight_scale, dtype=np.float64)

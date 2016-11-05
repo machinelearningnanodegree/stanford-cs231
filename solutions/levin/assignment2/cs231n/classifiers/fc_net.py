@@ -81,7 +81,7 @@ class TwoLayerNet(object):
         # class scores for X and storing them in the scores variable.                            #
         ############################################################################
         a1, cache_1 = affine_relu_forward(X, self.params['W1'], self.params['b1'])
-        a2, cache_2 = affine_relu_forward(a1, self.params['W2'], self.params['b2'])
+        a2, cache_2 = affine_forward(a1, self.params['W2'], self.params['b2'])
         scores = a2
         ############################################################################
         #                                                         END OF YOUR CODE                                                         #
@@ -103,7 +103,7 @@ class TwoLayerNet(object):
         # of 0.5 to simplify the expression for the gradient.                                            #
         ############################################################################
         loss, da2 = softmax_loss(a2, y)
-        da1, grads['W2'], grads['b2'] = affine_relu_backward(da2, cache_2)
+        da1, grads['W2'], grads['b2'] = affine_backward(da2, cache_2)
         _, grads['W1'], grads['b1'] = affine_relu_backward(da1, cache_1)
         
         # add the regularization term
@@ -253,7 +253,11 @@ class FullyConnectedNet(object):
             w_name = 'W' + str(layer_id)
             b_name = 'b' + str(layer_id)
             cache_name = 'cache_' + str(layer_id)
-            scores, cache[cache_name] = affine_relu_forward(scores, self.params[w_name], self.params[b_name])
+            if layer_id == len(layers_dim)-1:
+                # the last layer has no relut layer
+                scores, cache[cache_name] = affine_forward(scores, self.params[w_name], self.params[b_name])
+            else:
+                scores, cache[cache_name] = affine_relu_forward(scores, self.params[w_name], self.params[b_name])
          
         ############################################################################
         #                                                         END OF YOUR CODE                                                         #
@@ -284,17 +288,17 @@ class FullyConnectedNet(object):
             w_name = 'W' + str(layer_id)
             b_name = 'b' + str(layer_id)
             cache_name = 'cache_' + str(layer_id)
-            dx, grads[w_name], grads[b_name] = affine_relu_backward(dx, cache[cache_name])
+            if layer_id == len(layers_dim)-1:
+                dx, grads[w_name], grads[b_name] = affine_backward(dx, cache[cache_name])
+            else:
+                dx, grads[w_name], grads[b_name] = affine_relu_backward(dx, cache[cache_name])
         
         # add the regularization term
-        w_dict = {k:self.params[k] for k in self.params if k.startswith('W')}
-        w_square_sum = 0
-        for w_arr in w_dict.values():
-            w_square_sum += np.square(w_arr).sum()
-        loss = loss + 0.5 * self.reg * w_square_sum
-        
-        for w_key in w_dict:
-            grads[w_key] += self.reg * self.params[w_key]
+        for key,value in self.params.iteritems():
+            if not key.startswith('W'):
+                continue
+            loss += np.square(value).sum()
+            grads[key] += self.reg * self.params[key]
             
         ############################################################################
         #                                                         END OF YOUR CODE                                                         #
