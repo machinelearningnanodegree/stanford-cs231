@@ -297,7 +297,7 @@ class FullyConnectedNet(object):
         for key,value in self.params.iteritems():
             if not key.startswith('W'):
                 continue
-            loss += np.square(value).sum()
+            loss += 0.5 * self.reg * np.square(value).sum()
             grads[key] += self.reg * self.params[key]
             
         ############################################################################

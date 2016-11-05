@@ -382,10 +382,10 @@ class FullyConnectedNets(object):
             model = FullyConnectedNet([100, 100, 100, 100, 100], weight_scale=5e-2)
             
             solver = Solver(model, small_data,
-                            num_epochs=10, batch_size=100,
+                            num_epochs=5, batch_size=100,
                             update_rule=update_rule,
                             optim_config={
-                              'learning_rate': 1e-3,
+                              'learning_rate': 1e-2,
                             },
                             verbose=True)
             solvers[update_rule] = solver
