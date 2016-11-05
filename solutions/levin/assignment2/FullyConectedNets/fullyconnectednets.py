@@ -319,9 +319,9 @@ class FullyConnectedNets(object):
         }
         
         
-        learning_rate = 1e-3
-        weight_scale = 5e-2
-        model = FullyConnectedNet([100, 100],
+        learning_rate = 1e-2
+        weight_scale = 6e-2
+        model = FullyConnectedNet([100, 100, 100,100],
                       weight_scale=weight_scale, dtype=np.float64)
         
         solver = Solver(model, small_data,
