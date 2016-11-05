@@ -238,19 +238,23 @@ class FullyConnectedNets(object):
 #         self.y_val = y_val
 #         self.X_test = X_test
 #         self.y_test = y_test
-        
+        self.data = {
+                     'X_train': X_train,
+                    'y_train': y_train,
+                    'X_val': X_val,
+                    'y_val': y_val}
         return X_train, y_train, X_val, y_val,X_test,y_test
     def test_solver(self):
         
         
-        X_train, y_train, X_val, y_val,_,_ = self.get_CIFAR10_data()
-        data = {
-            'X_train': X_train,
-            'y_train': y_train,
-            'X_val': X_val,
-            'y_val': y_val}
+#         X_train, y_train, X_val, y_val,_,_ = self.get_CIFAR10_data()
+#         data = {
+#             'X_train': X_train,
+#             'y_train': y_train,
+#             'X_val': X_val,
+#             'y_val': y_val}
         
-        
+        data = self.data
         input_dim=3*32*32
         hidden_dim=100
         num_classes=10
@@ -286,8 +290,58 @@ class FullyConnectedNets(object):
         plt.gcf().set_size_inches(15, 12)
         plt.show()
         return
+    def test_multipile_layer_loss_gradient(self):
+        N, D, H1, H2, C = 2, 15, 20, 30, 10
+        X = np.random.randn(N, D)
+        y = np.random.randint(C, size=(N,))
+        
+        for reg in [0, 3.14]:
+            print 'Running check with reg = ', reg
+            model = FullyConnectedNet([H1, H2], input_dim=D, num_classes=C,
+                                      reg=reg, weight_scale=5e-2, dtype=np.float64)
+            
+            loss, grads = model.loss(X, y)
+            print 'Initial loss: ', loss
+            
+            for name in sorted(grads):
+                f = lambda _: model.loss(X, y)[0]
+                grad_num = eval_numerical_gradient(f, model.params[name], verbose=False, h=1e-5)
+                print '%s relative error: %.2e' % (name, self.rel_error(grad_num, grads[name]))
+        return
+    def test_overfit_small_batch(self):
+        num_train = 50
+        data = self.data
+        small_data = {
+          'X_train': data['X_train'][:num_train],
+          'y_train': data['y_train'][:num_train],
+          'X_val': data['X_val'],
+          'y_val': data['y_val'],
+        }
+        
+        
+        learning_rate = 2e-3
+        weight_scale = 5e-2
+        model = FullyConnectedNet([100, 100],
+                      weight_scale=weight_scale, dtype=np.float64)
+        
+        solver = Solver(model, small_data,
+                        print_every=10, num_epochs=20, batch_size=25,
+                        update_rule='sgd',
+                        optim_config={
+                          'learning_rate': learning_rate,
+                        }
+                 )
+        solver.train()
+        
+        plt.plot(solver.loss_history, 'o')
+        plt.title('Training loss history')
+        plt.xlabel('Iteration')
+        plt.ylabel('Training loss')
+        plt.show()
+        return
     
     def run(self):
+        self.get_CIFAR10_data()
 #         self.test_affine_forward()
 #         self.test_affine_backward()
 #         self.test_relu_forward()
@@ -295,7 +349,9 @@ class FullyConnectedNets(object):
 #         self.test_affine_relu()
 #         self.test_loss_layer_propogation()
 #         self.test_two_layer_implementation()
-        self.test_solver()
+#         self.test_solver()
+#         self.test_multipile_layer_loss_gradient()
+        self.test_overfit_small_batch()
         return
 
 
