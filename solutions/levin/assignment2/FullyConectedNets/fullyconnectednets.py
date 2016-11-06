@@ -20,6 +20,7 @@ from assignment2.cs231n.solver import Solver
 from assignment2.cs231n.layer_utils import affine_relu_forward, affine_relu_backward
 from assignment2.cs231n.data_utils import load_CIFAR10
 from assignment2.cs231n.optim import sgd_momentum
+from assignment2.cs231n.optim import rmsprop
 
 
 
@@ -420,6 +421,32 @@ class FullyConnectedNets(object):
         plt.gcf().set_size_inches(15, 15)
         plt.show()
         return
+    def test_RMSprop(self):
+        # Test RMSProp implementation; you should see errors less than 1e-7
+        
+        
+        N, D = 4, 5
+        w = np.linspace(-0.4, 0.6, num=N*D).reshape(N, D)
+        dw = np.linspace(-0.6, 0.4, num=N*D).reshape(N, D)
+        cache = np.linspace(0.6, 0.9, num=N*D).reshape(N, D)
+        
+        config = {'learning_rate': 1e-2, 'cache': cache}
+        next_w, _ = rmsprop(w, dw, config=config)
+        
+        expected_next_w = np.asarray([
+          [-0.39223849, -0.34037513, -0.28849239, -0.23659121, -0.18467247],
+          [-0.132737,   -0.08078555, -0.02881884,  0.02316247,  0.07515774],
+          [ 0.12716641,  0.17918792,  0.23122175,  0.28326742,  0.33532447],
+          [ 0.38739248,  0.43947102,  0.49155973,  0.54365823,  0.59576619]])
+        expected_cache = np.asarray([
+          [ 0.5976,      0.6126277,   0.6277108,   0.64284931,  0.65804321],
+          [ 0.67329252,  0.68859723,  0.70395734,  0.71937285,  0.73484377],
+          [ 0.75037008,  0.7659518,   0.78158892,  0.79728144,  0.81302936],
+          [ 0.82883269,  0.84469141,  0.86060554,  0.87657507,  0.8926    ]])
+        
+        print 'next_w error: ', self.rel_error(expected_next_w, next_w)
+        print 'cache error: ', self.rel_error(expected_cache, config['cache'])
+        return
     
     def run(self):
         self.get_CIFAR10_data()
@@ -434,7 +461,8 @@ class FullyConnectedNets(object):
 #         self.test_multipile_layer_loss_gradient()
 #         self.test_overfit_small_batch()
 #         self.test_sgd_momentum()
-        self.test_update_rule()
+#         self.test_update_rule()
+        self.test_RMSprop()
         return
 
 
