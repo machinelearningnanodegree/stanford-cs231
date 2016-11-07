@@ -3,6 +3,8 @@ import numpy as np
 from assignment2.cs231n.layers import *
 from assignment2.cs231n.layer_utils import affine_relu_forward
 from assignment2.cs231n.layer_utils import affine_relu_backward
+from assignment2.cs231n.layer_utils import affine_norm_relu_forward
+from assignment2.cs231n.layer_utils import affine_norm_relu_backward
 
 
 class TwoLayerNet(object):
@@ -185,6 +187,14 @@ class FullyConnectedNet(object):
             b_name = 'b' + str(layer_id)
             self.params[w_name] = weight_scale * np.random.randn(layers_dim[layer_id-1], layers_dim[layer_id])
             self.params[b_name] = np.zeros(layers_dim[layer_id])
+            if self.use_batchnorm:
+                if layer_id != len(layers_dim)-1:  
+                    #only add norm layer after hidden layer
+                    gamma_name = 'gamma' + str(layer_id)
+                    beta_name = 'beta' + str(layer_id)
+                    
+                    self.params[gamma_name] = np.ones(layers_dim[layer_id])
+                    self.params[beta_name] = np.zeros(layers_dim[layer_id])
         
         self.layers_dim = layers_dim
         ############################################################################
@@ -257,7 +267,13 @@ class FullyConnectedNet(object):
                 # the last layer has no relut layer
                 scores, cache[cache_name] = affine_forward(scores, self.params[w_name], self.params[b_name])
             else:
-                scores, cache[cache_name] = affine_relu_forward(scores, self.params[w_name], self.params[b_name])
+                if self.use_batchnorm:
+                    gamma_name = 'gamma' + str(layer_id)
+                    beta_name = 'beta' + str(layer_id)
+                    scores, cache[cache_name] = affine_norm_relu_forward(scores, self.params[w_name], self.params[b_name],
+                                                                         self.params[gamma_name],self.params[beta_name],self.bn_params[layer_id-1])
+                else:
+                    scores, cache[cache_name] = affine_relu_forward(scores, self.params[w_name], self.params[b_name])
          
         ############################################################################
         #                                                         END OF YOUR CODE                                                         #
@@ -291,7 +307,12 @@ class FullyConnectedNet(object):
             if layer_id == len(layers_dim)-1:
                 dx, grads[w_name], grads[b_name] = affine_backward(dx, cache[cache_name])
             else:
-                dx, grads[w_name], grads[b_name] = affine_relu_backward(dx, cache[cache_name])
+                if self.use_batchnorm:
+                    gamma_name = 'gamma' + str(layer_id)
+                    beta_name = 'beta' + str(layer_id)
+                    dx, grads[w_name], grads[b_name],grads[gamma_name], grads[beta_name] = affine_norm_relu_backward(dx, cache[cache_name])
+                else:
+                    dx, grads[w_name], grads[b_name] = affine_relu_backward(dx, cache[cache_name])
         
         # add the regularization term
         for key,value in self.params.iteritems():

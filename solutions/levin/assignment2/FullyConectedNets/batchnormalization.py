@@ -214,7 +214,8 @@ class BatchNormalization(object):
 #         self.test_batch_norm_forward_train_time()
 #         self.test_batch_norm_forward_test_time()
 #         self.backnorm_backward()
-        self.analytical_backward()
+#         self.analytical_backward()
+        self.check_network_withbatchnorm()
         return
 
 
