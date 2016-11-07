@@ -22,7 +22,7 @@ from assignment2.cs231n.data_utils import load_CIFAR10
 from assignment2.cs231n.optim import sgd_momentum
 from assignment2.cs231n.optim import rmsprop
 from assignment2.cs231n.optim import adam
-
+import time
 
 
 
@@ -144,11 +144,77 @@ class BatchNormalization(object):
                     'y_val': y_val}
         return X_train, y_train, X_val, y_val,X_test,y_test
   
-    
+    def backnorm_backward(self):
+        # Gradient check batchnorm backward pass
+
+        N, D = 4, 5
+        x = 5 * np.random.randn(N, D) + 12
+        gamma = np.random.randn(D)
+        beta = np.random.randn(D)
+        dout = np.random.randn(N, D)
+        
+        bn_param = {'mode': 'train'}
+        fx = lambda x: batchnorm_forward(x, gamma, beta, bn_param)[0]
+        fg = lambda a: batchnorm_forward(x, gamma, beta, bn_param)[0]
+        fb = lambda b: batchnorm_forward(x, gamma, beta, bn_param)[0]
+        
+        dx_num = eval_numerical_gradient_array(fx, x, dout)
+        da_num = eval_numerical_gradient_array(fg, gamma, dout)
+        db_num = eval_numerical_gradient_array(fb, beta, dout)
+        
+        _, cache = batchnorm_forward(x, gamma, beta, bn_param)
+        dx, dgamma, dbeta = batchnorm_backward(dout, cache)
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        print 'dgamma error: ', self.rel_error(da_num, dgamma)
+        print 'dbeta error: ', self.rel_error(db_num, dbeta)
+        return
+    def analytical_backward(self):
+        N, D = 100, 500
+        x = 5 * np.random.randn(N, D) + 12
+        gamma = np.random.randn(D)
+        beta = np.random.randn(D)
+        dout = np.random.randn(N, D)
+        
+        bn_param = {'mode': 'train'}
+        out, cache = batchnorm_forward(x, gamma, beta, bn_param)
+        
+        t1 = time.time()
+        dx1, dgamma1, dbeta1 = batchnorm_backward(dout, cache)
+        t2 = time.time()
+        dx2, dgamma2, dbeta2 = batchnorm_backward_alt(dout, cache)
+        t3 = time.time()
+        
+        print 'dx difference: ', self.rel_error(dx1, dx2)
+        print 'dgamma difference: ', self.rel_error(dgamma1, dgamma2)
+        print 'dbeta difference: ', self.rel_error(dbeta1, dbeta2)
+        print 'speedup: %.2fx' % ((t2 - t1) / (t3 - t2))
+        return
+    def check_network_withbatchnorm(self):
+        N, D, H1, H2, C = 2, 15, 20, 30, 10
+        X = np.random.randn(N, D)
+        y = np.random.randint(C, size=(N,))
+        
+        for reg in [0, 3.14]:
+            print 'Running check with reg = ', reg
+            model = FullyConnectedNet([H1, H2], input_dim=D, num_classes=C,
+                                      reg=reg, weight_scale=5e-2, dtype=np.float64,
+                                      use_batchnorm=True)
+            
+            loss, grads = model.loss(X, y)
+            print 'Initial loss: ', loss
+        
+            for name in sorted(grads):
+                f = lambda _: model.loss(X, y)[0]
+                grad_num = eval_numerical_gradient(f, model.params[name], verbose=False, h=1e-5)
+                print '%s relative error: %.2e' % (name, self.rel_error(grad_num, grads[name]))
+            if reg == 0: print
+        return
     def run(self):
         self.get_CIFAR10_data()
 #         self.test_batch_norm_forward_train_time()
-        self.test_batch_norm_forward_test_time()
+#         self.test_batch_norm_forward_test_time()
+#         self.backnorm_backward()
+        self.analytical_backward()
         return
 
 
