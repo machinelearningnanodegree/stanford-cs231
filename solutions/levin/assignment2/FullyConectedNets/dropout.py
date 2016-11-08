@@ -116,10 +116,31 @@ class Dropout(object):
         
         print 'dx relative error: ', self.rel_error(dx, dx_num)
         return
+    def check_fullconn_withdropout(self):
+        N, D, H1, H2, C = 2, 15, 20, 30, 10
+        X = np.random.randn(N, D)
+        y = np.random.randint(C, size=(N,))
+        
+        for dropout in [0, 0.25, 0.5]:
+            print 'Running check with dropout = ', dropout
+            model = FullyConnectedNet([H1, H2], input_dim=D, num_classes=C,
+                                  weight_scale=5e-2, dtype=np.float64,
+                                  dropout=dropout, seed=123)
+        
+            loss, grads = model.loss(X, y)
+            print 'Initial loss: ', loss
+        
+            for name in sorted(grads):
+                f = lambda _: model.loss(X, y)[0]
+                grad_num = eval_numerical_gradient(f, model.params[name], verbose=False, h=1e-5)
+                print '%s relative error: %.2e' % (name, self.rel_error(grad_num, grads[name]))
+                print
+        return
     def run(self):
         self.get_CIFAR10_data()
-        self.check_dropout_forward()
-        self.check_dropout_backward()
+#         self.check_dropout_forward()
+#         self.check_dropout_backward()
+        self.check_fullconn_withdropout()
         return
 
 

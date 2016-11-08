@@ -3,8 +3,8 @@ import numpy as np
 from assignment2.cs231n.layers import *
 from assignment2.cs231n.layer_utils import affine_relu_forward
 from assignment2.cs231n.layer_utils import affine_relu_backward
-from assignment2.cs231n.layer_utils import affine_norm_relu_forward
-from assignment2.cs231n.layer_utils import affine_norm_relu_backward
+from assignment2.cs231n.layer_utils import affine_relu_forward_ext
+from assignment2.cs231n.layer_utils import affine_relu_backward_ext
 
 
 class TwoLayerNet(object):
@@ -267,13 +267,24 @@ class FullyConnectedNet(object):
                 # the last layer has no relut layer
                 scores, cache[cache_name] = affine_forward(scores, self.params[w_name], self.params[b_name])
             else:
+                #the hiddlen layer
                 if self.use_batchnorm:
                     gamma_name = 'gamma' + str(layer_id)
                     beta_name = 'beta' + str(layer_id)
-                    scores, cache[cache_name] = affine_norm_relu_forward(scores, self.params[w_name], self.params[b_name],
-                                                                         self.params[gamma_name],self.params[beta_name],self.bn_params[layer_id-1])
+                    gamma = self.params[gamma_name]
+                    beta = self.params[beta_name]
+                    bn_param = self.bn_params[layer_id-1]
                 else:
-                    scores, cache[cache_name] = affine_relu_forward(scores, self.params[w_name], self.params[b_name])
+                    gamma=None
+                    beta=None
+                    bn_param=None
+                if self.use_dropout:
+                    dropout_param = self.dropout_param
+                else:
+                    dropout_param = None
+                    
+                scores, cache[cache_name] = affine_relu_forward_ext(scores, self.params[w_name], self.params[b_name],gamma,beta,bn_param,dropout_param)
+                
          
         ############################################################################
         #                                                         END OF YOUR CODE                                                         #
@@ -307,12 +318,14 @@ class FullyConnectedNet(object):
             if layer_id == len(layers_dim)-1:
                 dx, grads[w_name], grads[b_name] = affine_backward(dx, cache[cache_name])
             else:
-                if self.use_batchnorm:
-                    gamma_name = 'gamma' + str(layer_id)
-                    beta_name = 'beta' + str(layer_id)
-                    dx, grads[w_name], grads[b_name],grads[gamma_name], grads[beta_name] = affine_norm_relu_backward(dx, cache[cache_name])
-                else:
-                    dx, grads[w_name], grads[b_name] = affine_relu_backward(dx, cache[cache_name])
+                #the hiddlen layer
+                gamma_name = 'gamma' + str(layer_id)
+                beta_name = 'beta' + str(layer_id)
+                dx, grads[w_name], grads[b_name], dgamma, dbeta = affine_relu_backward_ext(dx, cache[cache_name])
+                if dgamma is not None:
+                    grads[gamma_name] = dgamma
+                if dbeta is not None:
+                    grads[beta_name] = dbeta 
         
         # add the regularization term
         for key,value in self.params.iteritems():
