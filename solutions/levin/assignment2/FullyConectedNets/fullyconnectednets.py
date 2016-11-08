@@ -235,12 +235,12 @@ class FullyConnectedNets(object):
         print 'Test data shape: ', X_test.shape
         print 'Test labels shape: ', y_test.shape
         
-#         self.X_train = X_train
-#         self.y_train = y_train
-#         self.X_val = X_val
-#         self.y_val = y_val
-#         self.X_test = X_test
-#         self.y_test = y_test
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_val = X_val
+        self.y_val = y_val
+        self.X_test = X_test
+        self.y_test = y_test
         self.data = {
                      'X_train': X_train,
                     'y_train': y_train,
@@ -492,6 +492,7 @@ class FullyConnectedNets(object):
         }
         solvers = {}
         learning_rates = {'rmsprop': 1e-4, 'adam': 1e-3}
+        
         for update_rule in ['adam', 'rmsprop']:
             print 'running with ', update_rule
             model = FullyConnectedNet([100, 100, 100, 100, 100], weight_scale=5e-2)
@@ -535,6 +536,55 @@ class FullyConnectedNets(object):
         plt.gcf().set_size_inches(15, 15)
         plt.show()
         return
+    def check_best_model(self):
+        
+        data = self.data
+#         num_train = 400
+        num_train = data['X_train'].shape[0]
+        small_data = {
+          'X_train': data['X_train'][:num_train],
+          'y_train': data['y_train'][:num_train],
+          'X_val': data['X_val'],
+          'y_val': data['y_val'],
+        }
+        dropout=0.1
+        model = FullyConnectedNet([100, 100, 100], weight_scale=5e-2, use_batchnorm=True, dropout=dropout)
+   
+        update_rule = 'adam'
+        learning_rate = 1e-3
+        solver = Solver(model, small_data,
+                        num_epochs=5, batch_size=100,
+                        update_rule=update_rule,
+                        optim_config={
+                          'learning_rate': learning_rate
+                        },
+                        verbose=True)
+        solver.train()
+        
+        test_acc = solver.check_accuracy(self.X_test, self.y_test)
+        print "test accuracy :{}".format(test_acc)
+        #visualiztion
+       
+        plt.subplot(2, 1, 1)
+        plt.title('Training loss')
+        plt.xlabel('Iteration')
+        plt.plot(solver.loss_history, 'o', label='traing loss')
+        
+        plt.subplot(2, 1, 2)
+        plt.title('Training/validation accuracy')
+        plt.xlabel('Epoch')
+        plt.plot(solver.train_acc_history, '-o', label='train accuracy')
+        plt.plot(solver.val_acc_history, '-o', label='validation accuracy')
+            
+
+           
+          
+        for i in [1, 2]:
+            plt.subplot(2, 1, i)
+            plt.legend(loc='upper center', ncol=4)
+        plt.gcf().set_size_inches(15, 15)
+#         plt.show()
+        return
     
     def run(self):
         self.get_CIFAR10_data()
@@ -552,7 +602,8 @@ class FullyConnectedNets(object):
 #         self.test_update_rule()
 #         self.test_RMSprop()
 #         self.test_adam()
-        self.compare_rmsprop_adam()
+#         self.compare_rmsprop_adam()
+        self.check_best_model()
         return
 
 
