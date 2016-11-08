@@ -90,7 +90,7 @@ class Dropout(object):
   
     
         return
-    def check_dropout(self):
+    def check_dropout_forward(self):
         x = np.random.randn(500, 500) + 10
 
         for p in [0.3, 0.6, 0.75]:
@@ -105,9 +105,21 @@ class Dropout(object):
             print 'Fraction of test-time output set to zero: ', (out_test == 0).mean()
             print
         return
+    def check_dropout_backward(self):
+        x = np.random.randn(10, 10) + 10
+        dout = np.random.randn(*x.shape)
+        
+        dropout_param = {'mode': 'train', 'p': 0.8, 'seed': 123}
+        out, cache = dropout_forward(x, dropout_param)
+        dx = dropout_backward(dout, cache)
+        dx_num = eval_numerical_gradient_array(lambda xx: dropout_forward(xx, dropout_param)[0], x, dout)
+        
+        print 'dx relative error: ', self.rel_error(dx, dx_num)
+        return
     def run(self):
         self.get_CIFAR10_data()
-        self.check_dropout()
+        self.check_dropout_forward()
+        self.check_dropout_backward()
         return
 
 
