@@ -160,7 +160,8 @@ class ConvNet(object):
         self.get_CIFAR10_data()
 #         self.check_conv_naive_forward()
 #         self.check_max_pooling_naive_forward()
-        self.check_max_pooling_naive_backward()
+#         self.check_max_pooling_naive_backward()
+        self.check_conv_naive_forward()
         
         return
 

@@ -424,11 +424,41 @@ def conv_forward_naive(x, w, b, conv_param):
 	- cache: (x, w, b, conv_param)
 	"""
 	out = None
+	
 	#############################################################################
 	# TODO: Implement the convolutional forward pass.													 #
 	# Hint: you can use the function np.pad for padding.												#
 	#############################################################################
-	pass
+	N, C, H, W = x.shape
+	
+	F, C, HH, WW = w.shape
+	
+	
+	stride = conv_param['stride']
+	pad = conv_param['pad']
+	
+	H_out = (H + 2 * pad - HH) / stride + 1
+	W_out = (W + 2 * pad - WW) / stride + 1
+	
+	out = np.zeros((N, F, H_out, W_out))
+	xwithpadding = np.zeros((N, C, H+ 2 * pad, W+ 2 * pad))
+	for n in range(N):
+		for c in range(C):
+			grid_x = x[n,c]
+			xwithpadding[n,c] = np.lib.pad(grid_x, pad, 'constant', constant_values=0)
+	
+	for n in range(N):
+		for f in range(F):
+			for height in range(H_out):
+				for width in range(W_out):
+					w_orig = (width+1-1) * stride + WW -1
+					h_orig = (height+1-1) * stride + HH -1
+					
+					grid_x = xwithpadding[n, :,(h_orig-HH+1):(h_orig+1), (w_orig-WW+1):(w_orig+1)]
+					fiter_weight = w[f]
+					
+					
+					out[n,f,height,width] = np.dot(grid_x.ravel(), fiter_weight.ravel()) + b[f]
 	#############################################################################
 	#														 END OF YOUR CODE															#
 	#############################################################################
@@ -480,21 +510,21 @@ def max_pool_forward_naive(x, pool_param):
 	# TODO: Implement the max pooling forward pass															#
 	#############################################################################
 	N, C, H, W = x.shape
-	F_h = pool_param['pool_height']
-	F_w = pool_param['pool_width']
-	F_s = pool_param['stride']
+	HH = pool_param['pool_height']
+	WW = pool_param['pool_width']
+	stride = pool_param['stride']
 	
-	H_out = (H - F_h)/F_s + 1
-	W_out = (W- F_w)/F_s + 1
+	H_out = (H - HH)/stride + 1
+	W_out = (W- WW)/stride + 1
 	out = np.zeros((N, C, H_out, W_out))
 	
 	for n in range(N):
 		for c in range(C):
 			for w in range(W_out):
 				for h in range(H_out):
-					w_orig = (w+1-1) * F_s + F_w -1
-					h_orig = (h+1-1) * F_s + F_h -1
-					grid = x[n, c,(h_orig-F_h+1):(h_orig+1), (w_orig-F_w+1):(w_orig+1)]
+					w_orig = (w+1-1) * stride + WW -1
+					h_orig = (h+1-1) * stride + HH -1
+					grid = x[n, c,(h_orig-HH+1):(h_orig+1), (w_orig-WW+1):(w_orig+1)]
 					out[n,c,h,w] = np.max(grid)
 	#############################################################################
 	#														 END OF YOUR CODE															#
