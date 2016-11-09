@@ -475,11 +475,27 @@ def max_pool_forward_naive(x, pool_param):
 	- out: Output data
 	- cache: (x, pool_param)
 	"""
-	out = None
+# 	out = None
 	#############################################################################
 	# TODO: Implement the max pooling forward pass															#
 	#############################################################################
-	pass
+	N, C, H, W = x.shape
+	F_h = pool_param['pool_height']
+	F_w = pool_param['pool_width']
+	F_s = pool_param['stride']
+	
+	H_out = (H - F_h)/F_s + 1
+	W_out = (W- F_w)/F_s + 1
+	out = np.zeros((N, C, H_out, W_out))
+	
+	for n in range(N):
+		for c in range(C):
+			for w in range(W_out):
+				for h in range(H_out):
+					w_orig = (w+1-1) * F_s + F_w -1
+					h_orig = (h+1-1) * F_s + F_h -1
+					grid = x[n, c,(h_orig-F_h+1):(h_orig+1), (w_orig-F_w+1):(w_orig+1)]
+					out[n,c,h,w] = np.max(grid)
 	#############################################################################
 	#														 END OF YOUR CODE															#
 	#############################################################################
@@ -502,7 +518,25 @@ def max_pool_backward_naive(dout, cache):
 	#############################################################################
 	# TODO: Implement the max pooling backward pass														 #
 	#############################################################################
-	pass
+	x, pool_param = cache
+	N, C, H_out, W_out = dout.shape
+	dx = np.zeros_like(x)
+	F_h = pool_param['pool_height']
+	F_w = pool_param['pool_width']
+	F_s = pool_param['stride']
+	for n in range(N):
+		for c in range(C):
+			for w in range(W_out):
+				for h in range(H_out):
+					w_orig = (w+1-1) * F_s + F_w -1
+					h_orig = (h+1-1) * F_s + F_h -1
+					grid_x = x[n, c,(h_orig-F_h+1):(h_orig+1), (w_orig-F_w+1):(w_orig+1)]
+					grid_dx = dx[n, c,(h_orig-F_h+1):(h_orig+1), (w_orig-F_w+1):(w_orig+1)]
+					max_value_index = np.unravel_index(grid_x.argmax(), grid_x.shape)
+					grid_dx[max_value_index] = dout[n,c,h,w]
+					
+					
+				
 	#############################################################################
 	#														 END OF YOUR CODE															#
 	#############################################################################
