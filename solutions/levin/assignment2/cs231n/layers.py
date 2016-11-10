@@ -479,11 +479,59 @@ def conv_backward_naive(dout, cache):
 	- dw: Gradient with respect to w
 	- db: Gradient with respect to b
 	"""
-	dx, dw, db = None, None, None
+# 	dx, dw, db = 0, 0, 0
+	
 	#############################################################################
 	# TODO: Implement the convolutional backward pass.													#
 	#############################################################################
-	pass
+	x, w, b, conv_param = cache
+	N, C, H, W = x.shape
+	
+	F, C, HH, WW = w.shape
+	
+	dx = np.zeros(x.shape)
+	dw = np.zeros(w.shape)
+	db = np.zeros(b.shape)
+	
+	
+	stride = conv_param['stride']
+	pad = conv_param['pad']
+	
+	H_out = (H + 2 * pad - HH) / stride + 1
+	W_out = (W + 2 * pad - WW) / stride + 1
+	
+	dxwithpadding = np.zeros((N, C, H+ 2 * pad, W+ 2 * pad))
+	xwithpadding = np.zeros((N, C, H+ 2 * pad, W+ 2 * pad))
+	for n in range(N):
+		for c in range(C):
+			slice_x = x[n,c]
+			xwithpadding[n,c] = np.lib.pad(slice_x, pad, 'constant', constant_values=0)
+	
+	for f in range(F):
+		for n in range(N):
+			for height in range(H_out):
+				for width in range(W_out):
+					w_orig = (width+1-1) * stride + WW -1
+					h_orig = (height+1-1) * stride + HH -1
+					
+					grid_dx = dxwithpadding[n, :,(h_orig-HH+1):(h_orig+1), (w_orig-WW+1):(w_orig+1)]
+					grid_x = xwithpadding[n, :,(h_orig-HH+1):(h_orig+1), (w_orig-WW+1):(w_orig+1)]
+					
+					dout_point = dout[n,f,height,width]
+					
+					grid_dx += dout_point * w[f]
+					dw[f] += dout_point * grid_x
+					db[f] += dout_point
+					
+	dxwithpadding_height = H+ 2 * pad
+	dxwithpadding_weight = W+ 2 * pad
+	dx = dxwithpadding[:, :,  pad:(dxwithpadding_height-pad), pad:(dxwithpadding_weight-pad)]
+# 	for n in range(N):
+# 		for c in range(C):
+# 			slice_dx = dxwithpadding[n,c]
+# 			slice_dx = slice_dx[pad:(dxwithpadding_height-pad), pad:(dxwithpadding_weight-pad)]
+# 			dx[n,c] = slice_dx
+					
 	#############################################################################
 	#														 END OF YOUR CODE															#
 	#############################################################################
