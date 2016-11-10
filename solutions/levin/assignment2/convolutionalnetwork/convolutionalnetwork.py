@@ -23,6 +23,7 @@ from assignment2.cs231n.optim import sgd_momentum
 from assignment2.cs231n.optim import rmsprop
 from assignment2.cs231n.optim import adam
 from assignment2.cs231n.fast_layers import *
+from assignment2.cs231n.classifiers.cnn import *
 # import time
 from scipy.misc import imread, imresize
 from cs231n.fast_layers import conv_forward_fast, conv_backward_fast
@@ -344,6 +345,20 @@ class ConvNet(object):
         print 'dw error: ', self.rel_error(dw_num, dw)
         print 'db error: ', self.rel_error(db_num, db)
         return
+    def samity_check_threelayer(self):
+        model = ThreeLayerConvNet()
+
+        N = 50
+        X = np.random.randn(N, 3, 32, 32)
+        y = np.random.randint(10, size=N)
+        
+        loss, grads = model.loss(X, y)
+        print 'Initial loss (no regularization): ', loss
+        
+        model.reg = 0.5
+        loss, grads = model.loss(X, y)
+        print 'Initial loss (with regularization): ', loss
+        return
     
     def run(self):
         self.get_CIFAR10_data()
@@ -356,7 +371,8 @@ class ConvNet(object):
 #         self.check_fast_conv()
 #         self.check_maxfast()
 #         self.check_conv_relu_pool()
-        self.check_conv_relu()
+#         self.check_conv_relu()
+        self.samity_check_threelayer()
         
         return
 
