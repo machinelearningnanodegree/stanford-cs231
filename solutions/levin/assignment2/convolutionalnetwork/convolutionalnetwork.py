@@ -23,8 +23,10 @@ from assignment2.cs231n.optim import sgd_momentum
 from assignment2.cs231n.optim import rmsprop
 from assignment2.cs231n.optim import adam
 from assignment2.cs231n.fast_layers import *
-import time
+# import time
 from scipy.misc import imread, imresize
+from cs231n.fast_layers import conv_forward_fast, conv_backward_fast
+from time import time
 
 
 
@@ -234,6 +236,114 @@ class ConvNet(object):
         self.imshow_noax(out[1, 1])
         plt.show()
         return
+    def check_fast_conv(self):
+        
+        
+        x = np.random.randn(100, 3, 31, 31)
+        w = np.random.randn(25, 3, 3, 3)
+        b = np.random.randn(25,)
+        dout = np.random.randn(100, 25, 16, 16)
+        conv_param = {'stride': 2, 'pad': 1}
+        
+        t0 = time()
+        out_naive, cache_naive = conv_forward_naive(x, w, b, conv_param)
+        t1 = time()
+        out_fast, cache_fast = conv_forward_fast(x, w, b, conv_param)
+        t2 = time()
+        
+        print 'Testing conv_forward_fast:'
+        print 'Naive: %fs' % (t1 - t0)
+        print 'Fast: %fs' % (t2 - t1)
+        print 'Speedup: %fx' % ((t1 - t0) / (t2 - t1))
+        print 'Difference: ', self.rel_error(out_naive, out_fast)
+        
+        t0 = time()
+        dx_naive, dw_naive, db_naive = conv_backward_naive(dout, cache_naive)
+        t1 = time()
+        dx_fast, dw_fast, db_fast = conv_backward_fast(dout, cache_fast)
+        t2 = time()
+        
+        print '\nTesting conv_backward_fast:'
+        print 'Naive: %fs' % (t1 - t0)
+        print 'Fast: %fs' % (t2 - t1)
+        print 'Speedup: %fx' % ((t1 - t0) / (t2 - t1))
+        print 'dx difference: ', self.rel_error(dx_naive, dx_fast)
+        print 'dw difference: ', self.rel_error(dw_naive, dw_fast)
+        print 'db difference: ', self.rel_error(db_naive, db_fast)
+        return
+    def check_maxfast(self):
+        from assignment2.cs231n.fast_layers import max_pool_forward_fast, max_pool_backward_fast
+
+        x = np.random.randn(100, 3, 32, 32)
+        dout = np.random.randn(100, 3, 16, 16)
+        pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
+        
+        t0 = time()
+        out_naive, cache_naive = max_pool_forward_naive(x, pool_param)
+        t1 = time()
+        out_fast, cache_fast = max_pool_forward_fast(x, pool_param)
+        t2 = time()
+        
+        print 'Testing pool_forward_fast:'
+        print 'Naive: %fs' % (t1 - t0)
+        print 'fast: %fs' % (t2 - t1)
+        print 'speedup: %fx' % ((t1 - t0) / (t2 - t1))
+        print 'difference: ', self.rel_error(out_naive, out_fast)
+        
+        t0 = time()
+        dx_naive = max_pool_backward_naive(dout, cache_naive)
+        t1 = time()
+        dx_fast = max_pool_backward_fast(dout, cache_fast)
+        t2 = time()
+        
+        print '\nTesting pool_backward_fast:'
+        print 'Naive: %fs' % (t1 - t0)
+        print 'speedup: %fx' % ((t1 - t0) / (t2 - t1))
+        print 'dx difference: ', self.rel_error(dx_naive, dx_fast)
+        return
+    def check_conv_relu_pool(self):
+        from assignment2.cs231n.layer_utils import conv_relu_pool_forward, conv_relu_pool_backward
+
+        x = np.random.randn(2, 3, 16, 16)
+        w = np.random.randn(3, 3, 3, 3)
+        b = np.random.randn(3,)
+        dout = np.random.randn(2, 3, 8, 8)
+        conv_param = {'stride': 1, 'pad': 1}
+        pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
+        
+        out, cache = conv_relu_pool_forward(x, w, b, conv_param, pool_param)
+        dx, dw, db = conv_relu_pool_backward(dout, cache)
+        
+        dx_num = eval_numerical_gradient_array(lambda x: conv_relu_pool_forward(x, w, b, conv_param, pool_param)[0], x, dout)
+        dw_num = eval_numerical_gradient_array(lambda w: conv_relu_pool_forward(x, w, b, conv_param, pool_param)[0], w, dout)
+        db_num = eval_numerical_gradient_array(lambda b: conv_relu_pool_forward(x, w, b, conv_param, pool_param)[0], b, dout)
+        
+        print 'Testing conv_relu_pool'
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        print 'dw error: ', self.rel_error(dw_num, dw)
+        print 'db error: ', self.rel_error(db_num, db)
+        return
+    def check_conv_relu(self):
+        from assignment2.cs231n.layer_utils import conv_relu_forward, conv_relu_backward
+
+        x = np.random.randn(2, 3, 8, 8)
+        w = np.random.randn(3, 3, 3, 3)
+        b = np.random.randn(3,)
+        dout = np.random.randn(2, 3, 8, 8)
+        conv_param = {'stride': 1, 'pad': 1}
+        
+        out, cache = conv_relu_forward(x, w, b, conv_param)
+        dx, dw, db = conv_relu_backward(dout, cache)
+        
+        dx_num = eval_numerical_gradient_array(lambda x: conv_relu_forward(x, w, b, conv_param)[0], x, dout)
+        dw_num = eval_numerical_gradient_array(lambda w: conv_relu_forward(x, w, b, conv_param)[0], w, dout)
+        db_num = eval_numerical_gradient_array(lambda b: conv_relu_forward(x, w, b, conv_param)[0], b, dout)
+        
+        print 'Testing conv_relu:'
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        print 'dw error: ', self.rel_error(dw_num, dw)
+        print 'db error: ', self.rel_error(db_num, db)
+        return
     
     def run(self):
         self.get_CIFAR10_data()
@@ -241,8 +351,12 @@ class ConvNet(object):
 #         self.check_max_pooling_naive_forward()
 #         self.check_max_pooling_naive_backward()
 #         self.check_conv_naive_forward()
-        self.check_conv_naive_backward()
+#         self.check_conv_naive_backward()
 #         self.check_imgpreprocess_conv()
+#         self.check_fast_conv()
+#         self.check_maxfast()
+#         self.check_conv_relu_pool()
+        self.check_conv_relu()
         
         return
 
