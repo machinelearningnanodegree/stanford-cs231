@@ -41,6 +41,7 @@ class ThreeLayerConvNet(object):
         self.reg = reg
         self.dtype = dtype
         
+        
         ############################################################################
         # TODO: Initialize weights and biases for the three-layer convolutional        #
         # network. Weights should be initialized from a Gaussian with standard         #
@@ -55,6 +56,7 @@ class ThreeLayerConvNet(object):
 #         stride = self.conv_param['stride']
 #         pad = self.conv_param['pad']
         C, H, W = input_dim
+        self.input_dim = input_dim
         self.params['W1'] = weight_scale * np.random.randn(num_filters, C, filter_size, filter_size)
         self.params['b1'] = np.zeros(num_filters)
         
@@ -95,6 +97,7 @@ class ThreeLayerConvNet(object):
         # variable.                                                                                                                                #
         ############################################################################
         #conv layer
+        X = X.reshape([X.shape[0]] +  list(self.input_dim))
         scores, conv_cache = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
         #hidden layer
         scores, hidden_cahe = affine_relu_forward(scores, W2, b2)

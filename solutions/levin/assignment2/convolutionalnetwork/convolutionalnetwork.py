@@ -1,6 +1,7 @@
 import sys
 import os
 from astropy.units import ys
+from gevent.hub import sleep
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -359,6 +360,45 @@ class ConvNet(object):
         loss, grads = model.loss(X, y)
         print 'Initial loss (with regularization): ', loss
         return
+    def check_threelayer_gradient_check(self):
+        num_inputs = 2
+        input_dim = (3, 16, 16)
+        reg = 0.0
+        num_classes = 10
+        X = np.random.randn(num_inputs, *input_dim)
+        y = np.random.randint(num_classes, size=num_inputs)
+        
+        model = ThreeLayerConvNet(num_filters=3, filter_size=3,
+                                  input_dim=input_dim, hidden_dim=7,
+                                  dtype=np.float64)
+        loss, grads = model.loss(X, y)
+        for param_name in sorted(grads):
+            f = lambda _: model.loss(X, y)[0]
+            param_grad_num = eval_numerical_gradient(f, model.params[param_name], verbose=False, h=1e-6)
+            e = self.rel_error(param_grad_num, grads[param_name])
+            print '%s max relative error: %e' % (param_name, self.rel_error(param_grad_num, grads[param_name]))
+        return
+    def overfit_small_data(self):
+        num_train = 60
+        data = self.data
+        small_data = {
+          'X_train': data['X_train'][:num_train],
+          'y_train': data['y_train'][:num_train],
+          'X_val': data['X_val'],
+          'y_val': data['y_val'],
+        }
+        
+        model = ThreeLayerConvNet(weight_scale=1e-2)
+        
+        solver = Solver(model, small_data,
+                        num_epochs=60, batch_size=50,
+                        update_rule='adam',
+                        optim_config={
+                          'learning_rate': 1e-3,
+                        },
+                        verbose=True, print_every=1)
+        solver.train()
+        return
     
     def run(self):
         self.get_CIFAR10_data()
@@ -372,7 +412,9 @@ class ConvNet(object):
 #         self.check_maxfast()
 #         self.check_conv_relu_pool()
 #         self.check_conv_relu()
-        self.samity_check_threelayer()
+#         self.samity_check_threelayer()
+#         self.check_threelayer_gradient_check()
+        self.overfit_small_data()
         
         return
 
