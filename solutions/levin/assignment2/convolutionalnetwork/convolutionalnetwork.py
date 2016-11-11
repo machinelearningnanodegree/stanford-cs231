@@ -417,6 +417,59 @@ class ConvNet(object):
         plt.show()
 
         return
+    def check_spatial_batch_norm_train(self):
+        # Check the training-time forward pass by checking means and variances
+        # of features both before and after spatial batch normalization
+        
+        N, C, H, W = 2, 3, 4, 5
+        x = 4 * np.random.randn(N, C, H, W) + 10
+        
+        print 'Before spatial batch normalization:'
+        print '  Shape: ', x.shape
+        print '  Means: ', x.mean(axis=(0, 2, 3))
+        print '  Stds: ', x.std(axis=(0, 2, 3))
+        
+        # Means should be close to zero and stds close to one
+        gamma, beta = np.ones(C), np.zeros(C)
+        bn_param = {'mode': 'train'}
+        out, _ = spatial_batchnorm_forward(x, gamma, beta, bn_param)
+        print 'After spatial batch normalization:'
+        print '  Shape: ', out.shape
+        print '  Means: ', out.mean(axis=(0, 2, 3))
+        print '  Stds: ', out.std(axis=(0, 2, 3))
+        
+        # Means should be close to beta and stds close to gamma
+        gamma, beta = np.asarray([3, 4, 5]), np.asarray([6, 7, 8])
+        out, _ = spatial_batchnorm_forward(x, gamma, beta, bn_param)
+        print 'After spatial batch normalization (nontrivial gamma, beta):'
+        print '  Shape: ', out.shape
+        print '  Means: ', out.mean(axis=(0, 2, 3))
+        print '  Stds: ', out.std(axis=(0, 2, 3))
+        return
+    def check_spatial_batch_norm_test(self):
+        # Check the test-time forward pass by running the training-time
+        # forward pass many times to warm up the running averages, and then
+        # checking the means and variances of activations after a test-time
+        # forward pass.
+        
+        N, C, H, W = 10, 4, 11, 12
+        
+        bn_param = {'mode': 'train'}
+        gamma = np.ones(C)
+        beta = np.zeros(C)
+        for t in xrange(50):
+            x = 2.3 * np.random.randn(N, C, H, W) + 13
+            spatial_batchnorm_forward(x, gamma, beta, bn_param)
+        bn_param['mode'] = 'test'
+        x = 2.3 * np.random.randn(N, C, H, W) + 13
+        a_norm, _ = spatial_batchnorm_forward(x, gamma, beta, bn_param)
+        
+        # Means should be close to zero and stds close to one, but will be
+        # noisier than training-time forward passes.
+        print 'After spatial batch normalization (test-time):'
+        print '  means: ', a_norm.mean(axis=(0, 2, 3))
+        print '  stds: ', a_norm.std(axis=(0, 2, 3))
+        return
     
     def run(self):
         self.data = self.get_CIFAR10_data()
@@ -433,7 +486,9 @@ class ConvNet(object):
 #         self.samity_check_threelayer()
 #         self.check_threelayer_gradient_check()
 #         self.overfit_small_data()
-        self.train_net()
+#         self.train_net()
+#         self.check_spatial_batch_norm_train()
+        self.check_spatial_batch_norm_test()
         
         return
 
