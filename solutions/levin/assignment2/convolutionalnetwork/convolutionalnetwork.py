@@ -470,6 +470,28 @@ class ConvNet(object):
         print '  means: ', a_norm.mean(axis=(0, 2, 3))
         print '  stds: ', a_norm.std(axis=(0, 2, 3))
         return
+    def check_spatial_batch_norm_backward(self):
+        N, C, H, W = 2, 3, 4, 5
+        x = 5 * np.random.randn(N, C, H, W) + 12
+        gamma = np.random.randn(C)
+        beta = np.random.randn(C)
+        dout = np.random.randn(N, C, H, W)
+        
+        bn_param = {'mode': 'train'}
+        fx = lambda x: spatial_batchnorm_forward(x, gamma, beta, bn_param)[0]
+        fg = lambda a: spatial_batchnorm_forward(x, gamma, beta, bn_param)[0]
+        fb = lambda b: spatial_batchnorm_forward(x, gamma, beta, bn_param)[0]
+        
+        dx_num = eval_numerical_gradient_array(fx, x, dout)
+        da_num = eval_numerical_gradient_array(fg, gamma, dout)
+        db_num = eval_numerical_gradient_array(fb, beta, dout)
+        
+        _, cache = spatial_batchnorm_forward(x, gamma, beta, bn_param)
+        dx, dgamma, dbeta = spatial_batchnorm_backward(dout, cache)
+        print 'dx error: ', self.rel_error(dx_num, dx)
+        print 'dgamma error: ', self.rel_error(da_num, dgamma)
+        print 'dbeta error: ', self.rel_error(db_num, dbeta)
+        return
     
     def run(self):
         self.data = self.get_CIFAR10_data()
@@ -488,7 +510,8 @@ class ConvNet(object):
 #         self.overfit_small_data()
 #         self.train_net()
 #         self.check_spatial_batch_norm_train()
-        self.check_spatial_batch_norm_test()
+#         self.check_spatial_batch_norm_test()
+        self.check_spatial_batch_norm_backward()
         
         return
 
