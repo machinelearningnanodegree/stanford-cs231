@@ -14,7 +14,6 @@ from assignment2.cs231n.layers import relu_forward
 from assignment2.cs231n.layers import relu_backward
 from assignment2.cs231n.layers import svm_loss
 from assignment2.cs231n.layers import softmax_loss
-from assignment2.cs231n.classifiers.fc_net import *
 from assignment2.cs231n.data_utils import get_CIFAR10_data
 from assignment2.cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
 from assignment2.cs231n.solver import Solver
@@ -25,6 +24,7 @@ from assignment2.cs231n.optim import rmsprop
 from assignment2.cs231n.optim import adam
 from assignment2.cs231n.fast_layers import *
 from assignment2.cs231n.classifiers.cnn import *
+from assignment2.cs231n.classifiers.fc_net import *
 # import time
 from scipy.misc import imread, imresize
 from cs231n.fast_layers import conv_forward_fast, conv_backward_fast
@@ -144,6 +144,8 @@ class ConvNet(object):
         cifar10_dir = '../../assignment1/cs231n/datasets/cifar-10-batches-py'
         X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
             
+        X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+        
         # Subsample the data
         mask = range(num_training, num_training + num_validation)
         X_val = X_train[mask]
@@ -154,36 +156,24 @@ class ConvNet(object):
         mask = range(num_test)
         X_test = X_test[mask]
         y_test = y_test[mask]
-        
+    
         # Normalize the data: subtract the mean image
         mean_image = np.mean(X_train, axis=0)
         X_train -= mean_image
         X_val -= mean_image
         X_test -= mean_image
         
-        # Reshape data to rows
-        X_train = X_train.reshape(num_training, -1)
-        X_val = X_val.reshape(num_validation, -1)
-        X_test = X_test.reshape(num_test, -1)
-        print 'Train data shape: ', X_train.shape
-        print 'Train labels shape: ', y_train.shape
-        print 'Validation data shape: ', X_val.shape
-        print 'Validation labels shape: ', y_val.shape
-        print 'Test data shape: ', X_test.shape
-        print 'Test labels shape: ', y_test.shape
-        
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_val = X_val
-        self.y_val = y_val
-        self.X_test = X_test
-        self.y_test = y_test
-        self.data = {
-                     'X_train': X_train,
-                    'y_train': y_train,
-                    'X_val': X_val,
-                    'y_val': y_val}
-        return X_train, y_train, X_val, y_val,X_test,y_test
+        # Transpose so that channels come first
+        X_train = X_train.transpose(0, 3, 1, 2).copy()
+        X_val = X_val.transpose(0, 3, 1, 2).copy()
+        X_test = X_test.transpose(0, 3, 1, 2).copy()
+    
+        # Package data into a dictionary
+        return {
+          'X_train': X_train, 'y_train': y_train,
+          'X_val': X_val, 'y_val': y_val,
+          'X_test': X_test, 'y_test': y_test,
+        }
   
     
         return
@@ -379,7 +369,7 @@ class ConvNet(object):
             print '%s max relative error: %e' % (param_name, self.rel_error(param_grad_num, grads[param_name]))
         return
     def overfit_small_data(self):
-        num_train = 60
+        num_train = 100
         data = self.data
         small_data = {
           'X_train': data['X_train'][:num_train],
@@ -391,7 +381,7 @@ class ConvNet(object):
         model = ThreeLayerConvNet(weight_scale=1e-2)
         
         solver = Solver(model, small_data,
-                        num_epochs=60, batch_size=50,
+                        num_epochs=10, batch_size=50,
                         update_rule='adam',
                         optim_config={
                           'learning_rate': 1e-3,
@@ -399,9 +389,37 @@ class ConvNet(object):
                         verbose=True, print_every=1)
         solver.train()
         return
+    def train_net(self):
+        data = self.data
+        num_train = data['X_train'].shape[0]
+        small_data = {
+          'X_train': data['X_train'][:num_train],
+          'y_train': data['y_train'][:num_train],
+          'X_val': data['X_val'],
+          'y_val': data['y_val'],
+        }
+        model = ThreeLayerConvNet(weight_scale=0.001, hidden_dim=500, reg=0.001)
+
+        solver = Solver(model, data,
+                        num_epochs=1, batch_size=50,
+                        update_rule='adam',
+                        optim_config={
+                          'learning_rate': 1e-3,
+                        },
+                        verbose=True, print_every=20)
+        solver.train()
+        from assignment2.cs231n.vis_utils import visualize_grid
+
+        grid = visualize_grid(model.params['W1'].transpose(0, 2, 3, 1))
+        plt.imshow(grid.astype('uint8'))
+        plt.axis('off')
+        plt.gcf().set_size_inches(5, 5)
+        plt.show()
+
+        return
     
     def run(self):
-        self.get_CIFAR10_data()
+        self.data = self.get_CIFAR10_data()
 #         self.check_conv_naive_forward()
 #         self.check_max_pooling_naive_forward()
 #         self.check_max_pooling_naive_backward()
@@ -414,7 +432,8 @@ class ConvNet(object):
 #         self.check_conv_relu()
 #         self.samity_check_threelayer()
 #         self.check_threelayer_gradient_check()
-        self.overfit_small_data()
+#         self.overfit_small_data()
+        self.train_net()
         
         return
 

@@ -97,7 +97,6 @@ class ThreeLayerConvNet(object):
         # variable.                                                                                                                                #
         ############################################################################
         #conv layer
-        X = X.reshape([X.shape[0]] +  list(self.input_dim))
         scores, conv_cache = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
         #hidden layer
         scores, hidden_cahe = affine_relu_forward(scores, W2, b2)
