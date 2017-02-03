@@ -67,4 +67,5 @@ and then run ipython notebook
 
 
 > __Thanks to Contributors:__
-[kvn219](https://github.com/kvn219), [LevinJ](https://github.com/LevinJ), & [pranayaryal](https://github.com/pranayaryal)
+[kvn219](https://github.com/kvn219), [LevinJ](https://github.com/LevinJ), [pranayaryal](https://github.com/pranayaryal), & [vijendra-rana](https://github.com/vijendra-rana)
+
